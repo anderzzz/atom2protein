@@ -337,11 +337,48 @@ class PMCData(WebService):
     '''Bla bla
 
     '''
-    def set_search_term(self, search_term):
-        '''Bla bla
+    def set_search_journal(self, journal_name):
+        '''Set the name of the journal for query.
+
+        Args:
+            journal_name (string): Name of journal. Whitespace allowed.
+
+        Returns: None
 
         '''
-        self.pubmed_search_term = search_term
+        params = {}
+        params['[Journal]'] = (self._plus_adjust(journal_name),)
+        self.uri_parameters.append(params)
+
+    def set_search_abstract(self, title_and_abstract):
+        '''Set condition on text in title or abstract for query.
+
+        Args:
+            title_and_abstract (string): Text to be present in title or
+                                         abstract. Whitespace allowed.
+
+        Returns: None
+
+        '''
+        params = {}
+        params['[Title/Abstract]'] = (self._plus_adjust(title_and_abstract),)
+        self.uri_parameters.append(params)
+
+    def set_search_publishdate(self, date_min, date_max):
+        '''Set condition on publication date for query.
+
+        Args:
+            date_min (string): Earliest publication date, format YYYYMMDD
+            date_max (string): Most recent publication date, format YYYYMMDD
+
+        Returns: None
+
+        '''
+        params = {}
+        date_tuple = ('/'.join([date_min[0:4], date_min[4:6], date_min[6:8]]),
+                      '/'.join([date_max[0:4], date_max[4:6], date_max[6:8]]))
+        params['[PDAT]'] = date_tuple
+        self.uri_parameters.append(params)
 
     def set_retmax(self, retmax):
         '''Bla bla
@@ -350,21 +387,60 @@ class PMCData(WebService):
         self.retmax = str(retmax)
 
     def search(self):
-        '''Bla bla
+        '''Perform the query of the PubMed database as set above. The function
+        constructs the parametes to the GET call and sets the list of PMIDs.
+
+        Args: None
+
+        Returns: None
 
         '''
-        search_terms = ['tool=' + self.tool, 'email=' + self.email]
-        search_terms += ['db=pubmed']
-        search_terms += ['term=' + self.pubmed_search_term]
-        search_params = '&'.join(search_terms)
-        http_string = self.url_base + self.search_prefix + '?' + search_params
+        # Set required constant parameters
+        uri_params = ['tool=' + self.tool, 'email=' + self.email]
+        uri_params += ['db=pubmed']
 
+        # Set the search term parameters
+        query = []
+        for term_part in self.uri_parameters:
+            for key, values in term_part.items():
+                out = ':'.join(values)
+                out += key
+                query.append(out)
+        term_parameters = '+AND+'.join(query)
+        uri_params += ['term=' + term_parameters]
+
+        # Construct HTTP string and get data
+        search_params = '&'.join(uri_params)
+        http_string = self.url_base + self.search_prefix + '?' + search_params
         content = self.get(http_string)
         ids = self._extract_pubmed_id(content)
         self.set_id(ids)
 
+    def _plus_adjust(self, string2adjust):
+        '''Replace intermediate white space in search terms with '+' signs.
+
+        Args:
+            string2adjust (string): string that can contain whitespace
+
+        Returns:
+            plus_string (string): string that contains no whitespace and with
+                                  intermediate whitespace replaced with '+'. 
+
+        '''
+        compact_string = string2adjust.strip()
+        plus_string = compact_string.replace(' ','+')
+        
+        return plus_string
+
     def _extract_pubmed_id(self, xml_string):
-        '''Bla bla
+        '''From the returned XML string of an advanced search of the PubMed,
+        the PMIDs are retrieved.
+
+        Args:
+            xml_string (string): The XML string obtained from the PubMed query.
+
+        Returns:
+            ret_ids (list): List of strings of the PMIDs.
 
         '''
         root = etree.fromstring(xml_string)
@@ -422,6 +498,7 @@ class PMCData(WebService):
         self.fetch_prefix = 'efetch.fcgi'
         self.tool = 'kenting_beach'
         self.email = 'atyro123@gmail.com'
+        self.uri_parameters = []
 
         # Search related parameters
         self.pubmed_search_term = ''
