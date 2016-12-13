@@ -9,7 +9,12 @@ class DownloadError(Exception):
     pass
 
 class WebService:
+    '''General purpose class for accessing data from and posting data to web
+    servers, particularly through REST APIs. The class methods are not
+    concerned with the nature of the data. Typically this class is used as a
+    parent to other classes.
 
+    '''
     def set_id(self, ids):
         '''Set ids of items to extract
 
@@ -26,6 +31,17 @@ class WebService:
             raise TypeError('Not all ids are strings')
         else:
             self.item_ids = [val.lower() for val in ids]
+
+    def get_id(self):
+        '''Return ids of items set so far.
+
+        Args: None
+
+        Returns:
+            ids (list): List of string identifiers
+
+        '''
+        return self.item_ids
 
     def get(self, http_string):
         '''Wrapper to execute the HTTP GET command and to check response and
@@ -120,7 +136,13 @@ class WebService:
         self.out_suffix = out_suffix
 
 class PDBData(WebService):
-    '''Bla bla
+    '''Class to query the PDB databank available at http://www.rcsb.org/pdb
+    using advanced search queries. The class also retrieves the data associated
+    with the queried structure identifiers, in other words, entire PDB files
+    can be obtained. 
+
+    Helpful documentation on the PDB Databank REST API is found at
+    http://www.rcsb.org/pdb/software/rest.do
 
     '''
     def set_search_pubmedid(self, idlist):
