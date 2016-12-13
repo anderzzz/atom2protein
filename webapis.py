@@ -333,8 +333,14 @@ class PDBData(WebService):
         self.save_to_disk = save_to_disk 
         self.print_list_only = print_list_only
 
-class PMCData(WebService):
-    '''Bla bla
+class PubMedData(WebService):
+    '''Class to query the PubMed database available at
+    http://www.ncbi.nlm.nih.gov/pubmed/
+    using advanced search queries. The class also retrieves the data associated
+    with the queried publication identifiers in the JSON format.
+
+    Helpful documentation on the PubMed REST API is found at
+    http://www.ncbi.nlm.nih.gov/books/NBK25501/
 
     '''
     def set_search_journal(self, journal_name):
@@ -396,24 +402,37 @@ class PMCData(WebService):
 
         '''
         # Set required constant parameters
-        uri_params = ['tool=' + self.tool, 'email=' + self.email]
-        uri_params += ['db=pubmed']
+        uri_params_root = ['tool=' + self.tool, 
+                           'email=' + self.email, 
+                           'retmax=' + str(self.retmax),
+                           'db=pubmed']
 
-        # Set the search term parameters
-        query = []
-        for term_part in self.uri_parameters:
-            for key, values in term_part.items():
-                out = ':'.join(values)
-                out += key
-                query.append(out)
-        term_parameters = '+AND+'.join(query)
-        uri_params += ['term=' + term_parameters]
+        ids = []
+        for retstart in range(0, self.max_ids, self.retmax):
+            uri_params = uri_params_root + ['retstart=' + str(retstart)]
 
-        # Construct HTTP string and get data
-        search_params = '&'.join(uri_params)
-        http_string = self.url_base + self.search_prefix + '?' + search_params
-        content = self.get(http_string)
-        ids = self._extract_pubmed_id(content)
+            # Build the query term based on specifications
+            query = []
+            for term_part in self.uri_parameters:
+                for key, values in term_part.items():
+                    out = ':'.join(values)
+                    out += key
+                    query.append(out)
+            term_parameters = '+AND+'.join(query)
+            uri_params += ['term=' + term_parameters]
+
+            # Construct HTTP string and get data
+            search_params = '&'.join(uri_params)
+            http_string = self.url_base + self.search_prefix + '?' + search_params
+            content = self.get(http_string)
+            ids_iteration = self._extract_pubmed_id(content)
+            ids += ids_iteration
+
+            # In case end of list reached before maximum allowed ids obtained,
+            # break the loop
+            if len(ids_iteration) < int(self.retmax):
+                break
+
         self.set_id(ids)
 
     def _plus_adjust(self, string2adjust):
@@ -502,7 +521,8 @@ class PMCData(WebService):
 
         # Search related parameters
         self.pubmed_search_term = ''
-        self.retmax = '2'
+        self.retmax = 100
+        self.max_ids = 10000
 
         # Runtime related parameters
         self.save_to_disk = save_to_disk
