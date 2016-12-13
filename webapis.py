@@ -123,6 +123,37 @@ class PDBData(WebService):
     '''Bla bla
 
     '''
+    def set_search_pubmedid(self, idlist):
+        '''Define pubmed identifiers to be associated with structures.
+
+        Args:
+            idlist (list): List of integer PubMed identifiers.
+
+        Returns: None
+
+        '''
+        params = {}
+        params['queryType'] = 'org.pdb.query.simple.PubmedIdQuery'
+        params['description'] = 'PubMed Identifiers'
+        params['pubMedIdList'] = ','.join([str(x) for x in idlist])
+        self.xml_parameters.append(params)
+
+    def set_search_description(self, val):
+        '''Define string part of structure description in a search query.
+
+        Args:
+            val (string): Text to be part of structure description
+
+        Returns: None
+
+        '''
+        params = {}
+        params['queryType'] = 'org.pdb.query.simple.StructDescQuery'
+        params['description'] = 'Structure Description'
+        params['entity.pdbx_description.comparator'] = 'contains'
+        params['entity.pdbx_description.value'] = val
+        self.xml_parameters.append(params)
+
     def set_search_resolution(self, res_min, res_max):
         '''Define lower and upper bound of X-ray resolution in a search query.
 
@@ -155,6 +186,42 @@ class PDBData(WebService):
         params['description'] = 'Structure Title Query'
         params['struct.title.comparator'] = 'contains'
         params['struct.title.value'] = val
+        self.xml_parameters.append(params)
+
+    def set_search_depositdate(self, date_min, date_max):
+        '''Define lower and upper bound for deposit date in a search query.
+
+        Args:
+            date_min (string): Earliest despoit date in format YYYY-MM-DD
+            date_max (string): Latest deposit date in format YYYY-MM-DD
+
+        Returns: None
+
+        '''
+        params = {}
+        params['queryType'] = 'org.pdb.query.simple.DepositDateQuery'
+        params['description'] = 'Structure Deposit Date Query'
+        params['database_PDB_rev.date_original.comparator'] = 'between'
+        params['database_PDB_rev.date_original.min'] = date_min
+        params['database_PDB_rev.date_original.max'] = date_max
+        params['database_PDB_rev.mod_type.value'] = '1'
+        self.xml_parameters.append(params)
+
+    def set_search_molweight(self, weight_min, weight_max):
+        '''Define lower and upper bound for molecular weight in a search query.
+
+        Args:
+            weight_min (float): Lowest molecular weight
+            weight_max (float): Highest molecular weight
+
+        Returns: None
+
+        '''
+        params = {}
+        params['queryType'] = 'org.pdb.query.simple.MolecularWeightQuery'
+        params['description'] = 'Structure Molecular Weight Query'
+        params['entity.formula_weight.min'] = str(weight_min)
+        params['entity.formula_weight.max'] = str(weight_max)
         self.xml_parameters.append(params)
 
     def search(self):
