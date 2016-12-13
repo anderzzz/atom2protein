@@ -123,22 +123,62 @@ class PDBData(WebService):
     '''Bla bla
 
     '''
-    def search(self):
-        '''Bla bla
+    def set_search_resolution(self, res_min, res_max):
+        '''Define lower and upper bound of X-ray resolution in a search query.
+
+        Args:
+            res_min (float): Lower bound of resolution in units of AA
+            res_max (float): Upper bound of resolution in units of AA
+
+        Returns: None
 
         '''
-        top = Element('orgPdbQuery')
-        child_query = SubElement(top, 'queryType')
-        child_query.text = 'org.pdb.query.simple.ResolutionQuery'
-        child_descr = SubElement(top, 'description')
-        child_descr.text = 'Automated query of PDB'
-        child_comparator = SubElement(top, 'refine.ls_d_res_high.comparator')
-        child_comparator.text = 'between'
-        child_min = SubElement(top, 'refine.ls_d_res_high.min')
-        child_min.text = '0.3'
-        child_max = SubElement(top, 'refine.ls_d_res_high.max')
-        child_max.text = '1.0'
+        params = {}
+        params['queryType'] = 'org.pdb.query.simple.ResolutionQuery'
+        params['description'] = 'Resolution Query'
+        params['refine.ls_d_res_high.comparator'] = 'between'
+        params['refine.ls_d_res_high.min'] = str(res_min)
+        params['refine.ls_d_res_high.max'] = str(res_max)
+        self.xml_parameters.append(params)
 
+    def set_search_title(self, val):
+        '''Define string part of structure title in a search query.
+
+        Args:
+            val (string): Text to be part of structure title
+
+        Returns: None
+
+        '''
+        params = {}
+        params['queryType'] = 'org.pdb.query.simple.StructTitleQuery'
+        params['description'] = 'Structure Title Query'
+        params['struct.title.comparator'] = 'contains'
+        params['struct.title.value'] = val
+        self.xml_parameters.append(params)
+
+    def search(self):
+        '''Function to execute a configured search and retrieve the PDB IDs of
+        the structures that satisfies search query.
+
+        Args: None
+
+        Returns: None
+
+        '''
+        # Construct a nested XML string that denotes a many criteria advanced
+        # search
+        top = Element('orgPdbCompositeQuery')
+        for level, params in enumerate(self.xml_parameters):
+            child_query_refinement = SubElement(top, 'queryRefinement')
+            child_query_level = SubElement(child_query_refinement, 'queryRefinementLevel')
+            child_query_level.text = str(level)
+            child_query_root = SubElement(child_query_refinement, 'orgPdbQuery')
+            for title, value in params.items():
+                child_p = SubElement(child_query_root, title)
+                child_p.text = value
+
+        # Post the XML string to the PDB server and retrieve data
         search_query = tostring(top)
         http_string = self.url_base + self.url_search
         content = self.post(http_string, search_query)
@@ -197,6 +237,7 @@ class PDBData(WebService):
         # Parameters relevant to a query to define a set of PDB IDs
         self.url_base = 'http://www.rcsb.org/pdb/rest/'
         self.url_search = 'search'
+        self.xml_parameters = []
 
         # Parameters relevant to retrieving the structure data
         self.url_filebase = 'https://files.rcsb.org/download/'
