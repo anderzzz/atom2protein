@@ -483,7 +483,7 @@ class PubMedData(WebService):
         '''
         for item_id in self.item_ids:
             fetch_terms = ['tool=' + self.tool, 'email=' + self.email]
-            fetch_terms += ['db=pubmed']
+            fetch_terms += ['db=pubmed', 'retmode=xml', 'rettype=xml']
             fetch_terms += ['id=' + item_id]
             fetch_params = '&'.join(fetch_terms)
             http_string = self.url_base + self.fetch_prefix + '?' + fetch_params

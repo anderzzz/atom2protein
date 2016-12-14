@@ -18,19 +18,17 @@ def main(args):
 #        print (structure)
 
     pmc_data = PubMedData(save_to_disk=True)
-#    pmc_data.set_search_journal('science')
-#    pmc_data.set_search_abstract('colon cancer')
-#    pmc_data.set_search_publishdate('10060101','20161201')
-#    pmc_data.search()
-#    print (pmc_data.get_id())
-#    for x in pmc_data:
-#        time.sleep(2)
-#        pubmed_entry = PubMedEntry(x)
-#        print (x)
-    f = open('pubmed_23118011.json')
-    jj = f.read()
-    print (jj)
-    uu = PubMedEntry(jj)
+    pmc_data.set_search_journal('science')
+    pmc_data.set_search_abstract('colon cancer')
+    pmc_data.set_search_publishdate('20060101','20161201')
+    pmc_data.search()
+    for x in pmc_data:
+        pubmed_entry = PubMedEntry(x)
+        print (pubmed_entry)
+#    f = open('pubmed_23118011.json')
+#    jj = f.read()
+#    print (jj)
+#    uu = PubMedEntry(jj)
 
 
 if __name__ == '__main__':
