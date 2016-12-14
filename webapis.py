@@ -509,7 +509,7 @@ class PubMedData(WebService):
 
         '''
         # Initialize parent class
-        super().__init__(out_prefix='pubmed_', out_suffix='.json')
+        super().__init__(out_prefix='pubmed_', out_suffix='.xml')
 
         # Search related constants
         self.url_base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
