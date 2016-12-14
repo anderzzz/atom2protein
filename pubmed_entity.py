@@ -6,6 +6,9 @@ import xml.etree.ElementTree as etree
 class XMLPathError(Exception):
     pass
 
+class PMIDResetError(Exception):
+    pass
+
 class PubMedEntry:
     '''Bla bla
 
@@ -56,7 +59,16 @@ class PubMedEntry:
         '''Bla bla
 
         '''
-        self.pmid = int(pmid)
+        if self.pmid == None:
+            self.pmid = int(pmid)
+        else:
+            raise PMIDResetError('PubMed ID already set. Changing it not an allowed operation')
+
+    def get_pmid(self):
+        '''Bla bla
+
+        '''
+        return self.pmid
 
     def _get_and_check(self, root, path, default=''):
         '''Bla bla
@@ -107,6 +119,21 @@ class PubMedEntry:
 
         return title_line + '\n' + pubmed_id_line
 
+    def __eq__(self, other):
+        '''Bla bla
+
+        '''
+        pmid_1 = self.get_pmid()
+        pmid_2 = other.get_pmid()
+
+        return pmid_1 == pmid_2
+
+    def __hash__(self):
+        '''Bla bla
+
+        '''
+        return self.get_pmid()
+
     def __init__(self, xml_rawdata):
         '''Bla bla
 
@@ -121,3 +148,34 @@ class PubMedEntry:
         self.journal_pages = None
 
         self._populate_from_xml(xml_rawdata) 
+
+class PubMedCorpus:
+    '''Bla bla
+
+    '''
+    def append(self, element):
+        '''Bla bla
+
+        '''
+        element_parsed = PubMedEntry(element)
+        self.container.add(element_parsed)
+
+    def __iter__(self):
+        '''Bla bla
+
+        '''
+        for entry in self.container:
+            yield entry
+
+    def __len__(self):
+        '''Bla bla
+
+        '''
+        return len(self.container)
+
+    def __init__(self):
+        '''Bla bla
+
+        '''
+        self.container = set([]) 
+

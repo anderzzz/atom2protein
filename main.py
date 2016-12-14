@@ -3,7 +3,7 @@ import time
 
 from webapis import PDBData
 from webapis import PubMedData
-from pubmed_entity import PubMedEntry
+from pubmed_entity import PubMedCorpus
 
 def main(args):
 
@@ -22,9 +22,12 @@ def main(args):
     pmc_data.set_search_abstract('colon cancer')
     pmc_data.set_search_publishdate('20060101','20161201')
     pmc_data.search()
+    pubmed_corpus = PubMedCorpus()
     for x in pmc_data:
-        pubmed_entry = PubMedEntry(x)
-        print (pubmed_entry)
+        pubmed_corpus.append(x)
+
+    print (pubmed_corpus.container)
+    print (len(pubmed_corpus))
 #    f = open('pubmed_23118011.json')
 #    jj = f.read()
 #    print (jj)
