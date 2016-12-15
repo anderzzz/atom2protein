@@ -1,62 +1,80 @@
 '''Bla bla
 
 '''
+import xml.etree.ElementTree as etree
+
+class UnknownPDBType(Exception):
+    pass
+
 class PDBParser:
     '''Bla bla
 
     '''
-    PDBLINE = {'HEADER' : 'header',
-               'TITLE ' : 'structure title',
-               'COMPND' : 'compound definitions',
-               'SOURCE' : 'source of protein',
-               'KEYWDS' : 'keywords',
-               'EXPDTA' : 'structure determination method',
-               'AUTHOR' : 'authors',
-               'SEQRES' : 'sequence',
-               'HETNAM' : 'non-protein residues',
-               'HELIX ' : 'helix range',
-               'SHEET ' : 'sheet range',
-               'SSBOND' : 'disulphide bonds',
-               'ATOM  ' : 'protein structure data',
-               'TER   ' : 'chain termination',
-               'HETATM' : 'non-protein structure data',
-               'CONECT' : 'atom connection',
-               'MASTER' : 'master line',
-               'END   ' : 'file termination'}
+    # Set constants
+    SUPPORTED_PDB_NS = ['{http://pdbml.pdb.org/schema/pdbx-v40.xsd}']
 
-    PDBREMARK = {'REMARK    2' : 'xray resolution',
-                 'REMARK    3' : 'refinement metadata'}
-
-    def _type_of_line(self, text):
+    def _get_pdb_namespace(self, xml_root):
         '''Bla bla
 
         '''
-        col1 = text[0:6]
-        if col1 in PDB2NEW:
-            ret_val = PDBLINE[col1]
+        if xml_root.tag[-9:] != 'datablock':
+            namespace = None
         else:
-            if col1 == 'REMARK':
-                col12 = text[0:10]
-                ret_val = PDBREMARK[col2]
-            else:
-                ret_val = None
+            namespace = xml_root.tag[0:-9]
 
-        return ret_val
+        return namespace
+
+    def _populate_from_xml(self, xml_string):
+        '''Bla bla
+
+        '''
+        root = etree.fromstring(xml_string) 
+        namespace = self._get_pdb_namespace(root)
+        if namespace is None:
+            raise UnknownPDBType('Could not locate namespace in PDB')
+        if not namespace in self.SUPPORTED_PDB_NS:
+            raise UnknownPDBType('Unknown namespace encountered: %s' %(namespace))
+
+        atoms = root.findall('.//%satom_site' %(namespace))
+        for atom in atoms:
+            atom_index = atom.attrib['id']
+            x_coord = atom.find('./%sCartn_x' %(namespace)).text
+            y_coord = atom.find('./%sCartn_y' %(namespace)).text
+            z_coord = atom.find('./%sCartn_z' %(namespace)).text
+            b_factor = atom.find('./%sB_iso_or_equiv' %(namespace)).text
+            element = atom.find('./%stype_symbol' %(namespace)).text
+            occ = atom.find('./%soccupancy' %(namespace)).text
+            name = atom.find('./%slabel_atom_id' %(namespace)).text
+            
+            residue_atom = Atom(name, x_coord, y_coord, z_coord,
+                                occ, b_factor, element, atom_index)
+
+            residue_name = atom.find('./%slabel_comp_id' %(namespace)).text
+            residue_index = atom.find('./%slabel_seq_id' %(namespace)).text
+            print (atom_index, x_coord, y_coord, z_coord)
+            raise TypeError
 
     def _populate_from_pdb(self, pdb_string):
         '''Bla bla
 
         '''
-        lines = pdb_string.split('\n')
-        for line in lines:
-            type_of_line = self._type_of_line(line) 
+        raise NotImplementedError('PDB parser based on text PDB file ' + \
+                                  'not implemented. Consider the XML ' + \
+                                  'version instead.') 
 
-    def __init__(self, pdb_string=None):
+    def __init__(self, xml_string=None, pdb_string=None, xml_file=None):
         '''Bla bla
 
         '''
+        # Populate structure from file or string parsing
         if not pdb_string is None:
             self._populate_from_pdb(pdb_string)
+        if not xml_string is None:
+            self._populate_from_xml(xml_string)
+        if not xml_file is None:
+            with open(xml_file) as fin:
+                xml_data = fin.read()
+                self._populate_from_xml(xml_data)
 
 class Experiment:
     '''Bla bla
