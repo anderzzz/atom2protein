@@ -139,7 +139,7 @@ class PDBData(WebService):
     '''Class to query the PDB databank available at http://www.rcsb.org/pdb
     using advanced search queries. The class also retrieves the data associated
     with the queried structure identifiers, in other words, entire PDB files
-    can be obtained. 
+    can be obtained. The XML format is preferred. 
 
     Helpful documentation on the PDB Databank REST API is found at
     http://www.rcsb.org/pdb/software/rest.do
@@ -298,7 +298,7 @@ class PDBData(WebService):
 
         '''
         for item_name in self.item_ids:
-            http_string = self.url_filebase + item_name + '.pdb'
+            http_string = self.url_filebase + item_name + '.xml'
             content_str = self.get(http_string)
 
             if self.save_to_disk:
@@ -321,7 +321,7 @@ class PDBData(WebService):
 
         '''
         # Initialize parent class
-        super().__init__(out_suffix='.pdb')
+        super().__init__(out_prefix='protein_', out_suffix='.xml')
 
         # Parameters relevant to a query to define a set of PDB IDs
         self.url_base = 'http://www.rcsb.org/pdb/rest/'
