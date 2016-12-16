@@ -4,7 +4,7 @@ import time
 from webapis import PDBData
 from webapis import PubMedData
 from pubmed_entity import PubMedCorpus
-from protein_structure import PDBParser
+from pdbparser import PDBParser
 
 def main(args):
 

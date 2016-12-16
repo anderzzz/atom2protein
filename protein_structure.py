@@ -1,118 +1,6 @@
 '''Bla bla
 
 '''
-import xml.etree.ElementTree as etree
-
-class UnknownPDBType(Exception):
-    pass
-
-class PDBParser:
-    '''Bla bla
-
-    '''
-    # Set constants
-    SUPPORTED_PDB_NS = ['{http://pdbml.pdb.org/schema/pdbx-v40.xsd}']
-
-    def _get_pdb_namespace(self, xml_root):
-        '''Bla bla
-
-        '''
-        if xml_root.tag[-9:] != 'datablock':
-            namespace = None
-        else:
-            namespace = xml_root.tag[0:-9]
-
-        return namespace
-
-    def _populate_from_xml(self, xml_string):
-        '''Bla bla
-
-        '''
-        residue_index_prev = -1
-        residue = None
-        chain_name_prev = '-1'
-        chain = None
-        structure = Structure()
-
-        root = etree.fromstring(xml_string) 
-        namespace = self._get_pdb_namespace(root)
-        if namespace is None:
-            raise UnknownPDBType('Could not locate namespace in PDB')
-        if not namespace in self.SUPPORTED_PDB_NS:
-            raise UnknownPDBType('Unknown namespace encountered: %s' %(namespace))
-
-        atoms = root.findall('.//%satom_site' %(namespace))
-        for atom in atoms:
-            atom_index = atom.attrib['id']
-            x_coord = atom.find('./%sCartn_x' %(namespace)).text
-            y_coord = atom.find('./%sCartn_y' %(namespace)).text
-            z_coord = atom.find('./%sCartn_z' %(namespace)).text
-            b_factor = atom.find('./%sB_iso_or_equiv' %(namespace)).text
-            element = atom.find('./%stype_symbol' %(namespace)).text
-            occ = atom.find('./%soccupancy' %(namespace)).text
-            name = atom.find('./%sauth_atom_id' %(namespace)).text
-            
-            residue_atom = Atom(name, x_coord, y_coord, z_coord,
-                                occ, b_factor, element, atom_index)
-
-            residue_name = atom.find('./%sauth_comp_id' %(namespace)).text
-            residue_index = atom.find('./%sauth_seq_id' %(namespace)).text
-            residue_type = atom.find('./%sgroup_PDB' %(namespace)).text
-
-            if residue_index != residue_index_prev:
-                if residue_type == 'ATOM':
-                    residue_new = ProteinResidue(residue_name, residue_index)
-                elif residue_type == 'HETATM':
-                    residue_new = Residue(residue_name, residue_index)
-                else:
-                    raise KeyError('Unsupported residue type %s' %(residue_type))
-                residue_index_prev = residue_index
-                if residue != None:
-                    chain.append(residue)
-
-                chain_name = atom.find('./%sauth_asym_id' %(namespace)).text
-                if chain_name != chain_name_prev:
-                    if chain != None:
-                        structure.add(chain)
-
-                    print (structure.keys())
-                    if chain_name in structure.keys():
-                        chain = structure[chain_name]
-                    else:
-                        chain = Chain(chain_name)
-
-                    chain_name_prev = chain_name
-                residue = residue_new
-
-            residue.append(residue_atom)
-
-        print (structure)
-        for c in structure:
-            print (c.label)
-
-
-    def _populate_from_pdb(self, pdb_string):
-        '''Bla bla
-
-        '''
-        raise NotImplementedError('PDB parser based on text PDB file ' + \
-                                  'not implemented. Consider the XML ' + \
-                                  'version instead.') 
-
-    def __init__(self, xml_string=None, pdb_string=None, xml_file=None):
-        '''Bla bla
-
-        '''
-        # Populate structure from file or string parsing
-        if not pdb_string is None:
-            self._populate_from_pdb(pdb_string)
-        if not xml_string is None:
-            self._populate_from_xml(xml_string)
-        if not xml_file is None:
-            with open(xml_file) as fin:
-                xml_data = fin.read()
-                self._populate_from_xml(xml_data)
-
 class Experiment:
     '''Bla bla
 
@@ -128,123 +16,95 @@ class Experiment:
         self.temp = temp
         self.authors = authors
 
-class Structure:
+class StructureContainerObject:
     '''Bla bla
 
     '''
-    def add(self, chain_object):
+    def add(self, child_add):
         '''Bla bla
 
         '''
-        for index, chain in enumerate(self.chains):
-            if chain.label == chain_object.label:
-                self.chains[index] = chain_object
+        for index, child_object in enumerate(self.child_objects):
+            if child_object.label == child_add.label:
+                self.child_objects[index] = child_add
                 break
         else:
-            self.chains.append(chain_object)
+            self.child_objects.append(child_add)
 
     def keys(self):
         '''Bla bla
 
         '''
-        return set([chain.get_label() for chain in self.chains])
+        return set([child_object.label for child_object in self.child_objects])
+
+    def items(self):
+        '''Bla bla
+
+        '''
+        for child_object in self.child_objects:
+            yield (child_object.label, child_object)
 
     def __getitem__(self, key):
         '''Bla bla
 
         '''
         if not isinstance(key, str):
-            raise TypeError('Key to structure elements should be string')
-        for chain in self.chains:
-            if chain.label == key:
+            raise TypeError('Key to structure object must be string')
+        for child_object in self.child_objects:
+            if child_object.label == key:
                 break
         else:
-            raise KeyError('Chain key %s not found in structure')
+            raise KeyError('Structure object with key %s not found' %(key))
 
-        return chain
-
-    def __setitem__(self, key, value):
-        '''Bla bla
-
-        '''
-        if not isinstance(key, str):
-            raise TypeError('Key to structure elements should be string')
-        if not isinstance(value, Chain):
-            raise TypeError('Structure elements should be Chain objects')
-        self.chains.append(value)
+        return child_object
 
     def __iter__(self):
         '''Bla bla
 
         '''
-        for chain in self.chains:
-            yield chain
+        for child_object in self.child_objects:
+            yield child_object.label
 
-    def __init__(self, title=None, pdb_id=None, experimental_data=None):
+    def __init__(self, label):
         '''Bla bla
 
         '''
-        self.title = title
-        self.pdb_id = pdb_id
-        self.experimental_data = experimental_data
-        self.chains = []
+        self.label = label.lower()
+        self.child_objects = []
 
-class Chain:
+class Structure(StructureContainerObject):
     '''Bla bla
 
     '''
-    def append(self, residue_object):
+    def __init__(self, label='dummy', experimental_data=None):
         '''Bla bla
 
         '''
-        self.residues.append(residue_object)
+        super().__init__(label)
+        self.experimental_data = experimental_data
 
-    def get_label(self):
-        '''Bla bla
+class Chain(StructureContainerObject):
+    '''Bla bla
 
-        '''
-        return self.label
-
-    def __iter__(self):
-        '''Bla bla
-
-        '''
-        for res in self.residues:
-            yield res
-
+    '''
     def __init__(self, label, bio_content=None):
         '''Bla bla
 
         '''
-        self.label = label
-        self.residues = []
+        super().__init__(label)
         self.bio_content = bio_content
 
-class Residue:
+class Residue(StructureContainerObject):
     '''Bla bla
 
     '''
-    def append(self, atom_object):
+    def __init__(self, name, residue_id, residue_insert='', description=None):
         '''Bla bla
 
         '''
-        self.atoms.append(atom_object)
-
-    def __iter__(self):
-        '''Bla bla
-
-        '''
-        for atom in self.atoms:
-            yield atom
-
-    def __init__(self, name_3lc, residue_id, description=None):
-        '''Bla bla
-
-        '''
-        self.residue_name_3lc = name_3lc.lower()
-        self.index = int(residue_id)
+        super().__init__(residue_id + residue_insert)
         self.description = description
-        self.atoms = []
+        self.residue_name_3lc = name.lower()
 
 class ProteinResidue(Residue):
     '''Bla bla
@@ -332,11 +192,11 @@ class ProteinResidue(Residue):
 
         return ret
 
-    def __init__(self, name_3lc, residue_id, secondary_structure=None):
+    def __init__(self, name_3lc, residue_id, residue_insert='', secondary_structure=None):
         '''Bla bla
 
         '''
-        super().__init__(name_3lc, residue_id)
+        super().__init__(name_3lc, residue_id + residue_insert)
         self.residue_name_1lc = self.code3_to_1(name_3lc)
         self.residue_polarity_class = self.get_polarity(self.residue_name_3lc)
         self.secondary_structure = self._validate_ss(secondary_structure)
@@ -345,12 +205,12 @@ class Atom:
     '''Bla bla
 
     '''
-    ELEMENT_DATA = {'H' : {'mass' : 1.0},
-                    'C' : {'mass' : 12.01},
-                    'N' : {'mass' : 14.01},
-                    'O' : {'mass' : 16.00},
-                    'S' : {'mass' : 32.07},
-                    'P' : {'mass' : 30.97}}
+    ELEMENT_DATA = {'h' : {'mass' : 1.0},
+                    'c' : {'mass' : 12.01},
+                    'n' : {'mass' : 14.01},
+                    'o' : {'mass' : 16.00},
+                    's' : {'mass' : 32.07},
+                    'p' : {'mass' : 30.97}}
 
     def _retrieve_property(self, element_key, property_name):
         '''Bla bla
@@ -367,7 +227,7 @@ class Atom:
         '''Bla bla
 
         '''
-        self.atom_name = name
+        self.label = name
         self.coordinates = (float(x), float(y), float(z))
         self.occupancy = float(occupancy)
         self.bfactor = float(bfactor)
