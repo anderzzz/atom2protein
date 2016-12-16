@@ -28,6 +28,12 @@ class PDBParser:
         '''Bla bla
 
         '''
+        residue_index_prev = -1
+        residue = None
+        chain_name_prev = '-1'
+        chain = None
+        structure = Structure()
+
         root = etree.fromstring(xml_string) 
         namespace = self._get_pdb_namespace(root)
         if namespace is None:
@@ -44,15 +50,46 @@ class PDBParser:
             b_factor = atom.find('./%sB_iso_or_equiv' %(namespace)).text
             element = atom.find('./%stype_symbol' %(namespace)).text
             occ = atom.find('./%soccupancy' %(namespace)).text
-            name = atom.find('./%slabel_atom_id' %(namespace)).text
+            name = atom.find('./%sauth_atom_id' %(namespace)).text
             
             residue_atom = Atom(name, x_coord, y_coord, z_coord,
                                 occ, b_factor, element, atom_index)
 
-            residue_name = atom.find('./%slabel_comp_id' %(namespace)).text
-            residue_index = atom.find('./%slabel_seq_id' %(namespace)).text
-            print (atom_index, x_coord, y_coord, z_coord)
-            raise TypeError
+            residue_name = atom.find('./%sauth_comp_id' %(namespace)).text
+            residue_index = atom.find('./%sauth_seq_id' %(namespace)).text
+            residue_type = atom.find('./%sgroup_PDB' %(namespace)).text
+
+            if residue_index != residue_index_prev:
+                if residue_type == 'ATOM':
+                    residue_new = ProteinResidue(residue_name, residue_index)
+                elif residue_type == 'HETATM':
+                    residue_new = Residue(residue_name, residue_index)
+                else:
+                    raise KeyError('Unsupported residue type %s' %(residue_type))
+                residue_index_prev = residue_index
+                if residue != None:
+                    chain.append(residue)
+
+                chain_name = atom.find('./%sauth_asym_id' %(namespace)).text
+                if chain_name != chain_name_prev:
+                    if chain != None:
+                        structure.add(chain)
+
+                    print (structure.keys())
+                    if chain_name in structure.keys():
+                        chain = structure[chain_name]
+                    else:
+                        chain = Chain(chain_name)
+
+                    chain_name_prev = chain_name
+                residue = residue_new
+
+            residue.append(residue_atom)
+
+        print (structure)
+        for c in structure:
+            print (c.label)
+
 
     def _populate_from_pdb(self, pdb_string):
         '''Bla bla
@@ -80,7 +117,8 @@ class Experiment:
     '''Bla bla
 
     '''
-    def __init__(self, method, resolution=None, ph=None, temp=None):
+    def __init__(self, method=None, resolution=None, ph=None, temp=None,
+                 authors=None):
         '''Bla bla
 
         '''
@@ -88,16 +126,52 @@ class Experiment:
         self.resolution = resolution
         self.ph = ph
         self.temp = temp
+        self.authors = authors
 
 class Structure:
     '''Bla bla
 
     '''
-    def append(self, chain_object):
+    def add(self, chain_object):
         '''Bla bla
 
         '''
-        self.chains.append(chain_object)
+        for index, chain in enumerate(self.chains):
+            if chain.label == chain_object.label:
+                self.chains[index] = chain_object
+                break
+        else:
+            self.chains.append(chain_object)
+
+    def keys(self):
+        '''Bla bla
+
+        '''
+        return set([chain.get_label() for chain in self.chains])
+
+    def __getitem__(self, key):
+        '''Bla bla
+
+        '''
+        if not isinstance(key, str):
+            raise TypeError('Key to structure elements should be string')
+        for chain in self.chains:
+            if chain.label == key:
+                break
+        else:
+            raise KeyError('Chain key %s not found in structure')
+
+        return chain
+
+    def __setitem__(self, key, value):
+        '''Bla bla
+
+        '''
+        if not isinstance(key, str):
+            raise TypeError('Key to structure elements should be string')
+        if not isinstance(value, Chain):
+            raise TypeError('Structure elements should be Chain objects')
+        self.chains.append(value)
 
     def __iter__(self):
         '''Bla bla
@@ -124,6 +198,12 @@ class Chain:
 
         '''
         self.residues.append(residue_object)
+
+    def get_label(self):
+        '''Bla bla
+
+        '''
+        return self.label
 
     def __iter__(self):
         '''Bla bla
@@ -161,7 +241,7 @@ class Residue:
         '''Bla bla
 
         '''
-        self.name_3lc = name_3lc
+        self.residue_name_3lc = name_3lc.lower()
         self.index = int(residue_id)
         self.description = description
         self.atoms = []
@@ -177,7 +257,25 @@ class ProteinResidue(Residue):
              ('phe', 'f'), ('trp', 'w'), ('met', 'm'), ('his', 'h')]
 
     RESIDUE_DATA = {'ala' : {'polarity' : 'hydrophobic'},
-                    'asp' : {'polarity' : 'negative charge'}}
+                    'asp' : {'polarity' : 'negative charge'},
+                    'asn' : {'polarity' : 'hydrophilic'},
+                    'arg' : {'polarity' : 'positive charge'},
+                    'cys' : {'polarity' : 'hydrophobic'},
+                    'gly' : {'polarity' : 'hydrophilic'},
+                    'gln' : {'polarity' : 'hydrophilic'},
+                    'glu' : {'polarity' : 'negative charge'},
+                    'lys' : {'polarity' : 'positive charge'},
+                    'pro' : {'polarity' : 'hydrophobic'},
+                    'leu' : {'polarity' : 'hydrophobic'},
+                    'ile' : {'polarity' : 'hydrophobic'},
+                    'val' : {'polarity' : 'hydrophobic'},
+                    'thr' : {'polarity' : 'hydrophilic'},
+                    'ser' : {'polarity' : 'hydrophilic'},
+                    'tyr' : {'polarity' : 'hydrophobic'},
+                    'phe' : {'polarity' : 'hydrophobic'},
+                    'trp' : {'polarity' : 'hydrophobic'},
+                    'met' : {'polarity' : 'hydrophobic'},
+                    'his' : {'polarity' : 'hydrophilic'}}
 
     SS_DATA = {'helix' : {}, 'sheet' : {}, 'loop' : {}}
 
@@ -185,7 +283,7 @@ class ProteinResidue(Residue):
         '''Bla bla
 
         '''
-        code_pair_index = [sc[n_type + 1 % 2] for sc in self.CODES if s[n_type] == s]
+        code_pair_index = [sc[n_type + 1 % 2] for sc in self.CODES if sc[n_type] == s]
         if len(code_pair_index) != 1:
             raise KeyError('Unsupported protein residue code: %s' %(s))
 
@@ -217,24 +315,30 @@ class ProteinResidue(Residue):
         '''
         return self._code_conversion(s.lower(), 1)
 
-    def retrieve_property(self, residue_key, property_name):
+    def get_polarity(self, name):
         '''Bla bla
 
         '''
-        if residue_key in RESIDUE_DATA:
-            ret = RESIDUE_DATA[residue_key][property_name]
+        return self._retrieve_property(name, 'polarity')
+
+    def _retrieve_property(self, residue_key, property_name):
+        '''Bla bla
+
+        '''
+        if residue_key in self.RESIDUE_DATA:
+            ret = self.RESIDUE_DATA[residue_key][property_name]
         else:
-            raise KeyError('Undefined residue %s' %(s))
+            raise KeyError('Undefined residue %s' %(residue_key))
 
         return ret
 
-    def __init__(self, name_3lc, secondary_structure=None):
+    def __init__(self, name_3lc, residue_id, secondary_structure=None):
         '''Bla bla
 
         '''
-        super.__init__(name_3lc)
+        super().__init__(name_3lc, residue_id)
         self.residue_name_1lc = self.code3_to_1(name_3lc)
-        self.residue_polarity_class = self.set_polarity(name_3lc)
+        self.residue_polarity_class = self.get_polarity(self.residue_name_3lc)
         self.secondary_structure = self._validate_ss(secondary_structure)
 
 class Atom:
@@ -248,12 +352,12 @@ class Atom:
                     'S' : {'mass' : 32.07},
                     'P' : {'mass' : 30.97}}
 
-    def retrieve_property(self, element_key, property_name):
+    def _retrieve_property(self, element_key, property_name):
         '''Bla bla
 
         '''
-        if element_key in ELEMENT_DATA:
-            ret = ELEMENT_DATA[element_key][property_name]
+        if element_key in self.ELEMENT_DATA:
+            ret = self.ELEMENT_DATA[element_key][property_name]
         else:
             raise KeyError('Undefined element %s' %(element_key))
 
@@ -269,5 +373,5 @@ class Atom:
         self.bfactor = float(bfactor)
         self.element = element
         self.atom_index = int(number)
-        self.atom_mass = self.retrieve_property(element, 'mass')
+        self.atom_mass = self._retrieve_property(element, 'mass')
 
