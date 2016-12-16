@@ -69,7 +69,8 @@ class PDBParser:
             residue_type = self._find_text('group_PDB', atom, namespace)
             chain_name = self._find_text('auth_asym_id', atom, namespace)
             residue_atom = Atom(name, x_coord, y_coord, z_coord,
-                                occ, b_factor, element, atom_index)
+                                element, occupancy=occ, bfactor=b_factor,
+                                number=atom_index)
 
             if residue_index != residue_index_prev:
                 if residue_type == 'atom':
