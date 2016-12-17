@@ -52,10 +52,26 @@ class PDBParser:
         return ret
 
     def _populate_from_xml(self, xml_string):
+        '''Populate structure object with metadata from an XML string.
+
+        Args:
+            xml_string (string): String of XML data in PDBML format.
+
+        '''
+        self._populate_structure_from_xml(xml_string)
+        self._populate_experiment_from_xml(xml_string)
+
+    def _populate_experiment_from_xml(self, xml_string):
+        '''Bla bla
+
+        '''
+        pass
+
+    def _populate_structure_from_xml(self, xml_string):
         '''Populate a protein structure object from an XML string.
 
         Args:
-            xml_string (string): String of XML data in PDB format.
+            xml_string (string): String of XML data in PDBML format.
 
         '''
         residue_index_prev = -1
