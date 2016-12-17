@@ -5,6 +5,7 @@ from webapis import PDBData
 from webapis import PubMedData
 from pubmed_entity import PubMedCorpus
 from pdbparser import PDBParser
+from dataset_maker import DataSetMaker
 
 def main(args):
 
@@ -34,9 +35,12 @@ def main(args):
 #    print (jj)
 #    uu = PubMedEntry(jj)
 
-    f = open('protein_3r0m.xml')
-    xml_string = f.read()
-    parser = PDBParser(xml_string=xml_string)
+#    f = open('protein_3r0m.xml')
+#    xml_string = f.read()
+#    parser = PDBParser(xml_string=xml_string)
+
+    maker = DataSetMaker()
+    maker()
 
 
 if __name__ == '__main__':
