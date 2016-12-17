@@ -8,14 +8,19 @@ class UnknownPDBType(Exception):
     pass
 
 class PDBParser:
-    '''Bla bla
+    '''Class for parsing PDB structure file
 
     '''
-    # Set constants
     SUPPORTED_PDB_NS = ['{http://pdbml.pdb.org/schema/pdbx-v40.xsd}']
 
     def _get_pdb_namespace(self, xml_root):
-        '''Bla bla
+        '''Method to retrieve the XML namespace from the root.
+
+        Args:
+            xml_root (object): The XML root from the ElementTree class.
+
+        Returns:
+            namespace (string): XML namespace.
 
         '''
         if xml_root.tag[-9:] != 'datablock':
@@ -26,7 +31,16 @@ class PDBParser:
         return namespace
 
     def _find_text(self, tag, collection, namespace):
-        '''Bla bla
+        '''Find text in the XML atom record.
+
+        Args:
+            tag (string): The tag to retrieve text from.
+            collection (object): The atom XML collection object to parse.
+            namespace (string): The namespace of the XML object.
+
+        Returns:
+            text (string): The text found in the atom XML collection for given
+                           tag. If tag not found, returns None.
 
         '''
         text = collection.find('./%s%s' %(namespace, tag)).text
@@ -38,23 +52,28 @@ class PDBParser:
         return ret
 
     def _populate_from_xml(self, xml_string):
-        '''Bla bla
+        '''Populate a protein structure object from an XML string.
+
+        Args:
+            xml_string (string): String of XML data in PDB format.
 
         '''
         residue_index_prev = -1
         residue = None
         chain_name_prev = '-1'
         chain = None
-        structure = Structure()
 
         root = etree.fromstring(xml_string) 
+        pdb_code = root.attrib['datablockName']
         namespace = self._get_pdb_namespace(root)
         if namespace is None:
             raise UnknownPDBType('Could not locate namespace in PDB')
         if not namespace in self.SUPPORTED_PDB_NS:
             raise UnknownPDBType('Unknown namespace encountered: %s' %(namespace))
 
+        structure = Structure(label=pdb_code)
         atoms = root.findall('.//%satom_site' %(namespace))
+        # Loop over all atoms in structure and populate structure object
         for atom in atoms:
             atom_index = atom.attrib['id']
             x_coord = self._find_text('Cartn_x', atom, namespace)
@@ -72,6 +91,7 @@ class PDBParser:
                                 element, occupancy=occ, bfactor=b_factor,
                                 number=atom_index)
 
+            # If a new residue is encountered, create new residue object
             if residue_index != residue_index_prev:
                 if residue_type == 'atom':
                     residue_new = ProteinResidue(residue_name, residue_index)
@@ -80,33 +100,36 @@ class PDBParser:
                 else:
                     raise KeyError('Unsupported residue type %s' %(residue_type))
                 residue_index_prev = residue_index
+
+                # Add the old residue object to the current chain object
                 if residue != None:
                     chain.add(residue)
 
+                # Reset the current residue to the new residue
+                residue = residue_new
+
+                # If a new chain is encountered, create new chain object, or
+                # retrieve the incomplete chain object already in structure
                 if chain_name != chain_name_prev:
+
+                    # Add the old chain to the structure
                     if chain != None:
                         structure.add(chain)
 
-                    print (chain_name, structure.keys())
+                    # If the chain already exist in the structure, retrieve it
+                    # and continue to add to it
                     if chain_name in structure.keys():
                         chain = structure[chain_name]
-                        print ('aaa')
                     else:
                         chain = Chain(chain_name)
-
                     chain_name_prev = chain_name
-                residue = residue_new
 
+            # Add atom to current residue
             residue.add(residue_atom)
 
-        for label, c in structure.items():
-            for idr, r in c.items():
-                for nn, a in r.items():
-                    print (label, idr, nn, a)
-
-
     def _populate_from_pdb(self, pdb_string):
-        '''Bla bla
+        '''Populate a protein structure object from an PDB string. Currently
+        not implemented.
 
         '''
         raise NotImplementedError('PDB parser based on text PDB file ' + \
@@ -114,7 +137,13 @@ class PDBParser:
                                   'version instead.') 
 
     def __init__(self, xml_string=None, pdb_string=None, xml_file=None):
-        '''Bla bla
+        '''Initialize the protein structure parser.
+
+        Args:
+            xml_string (string): XML string of the structure in the PDML format.
+            pdb_string (string): String of the structure in the PDB format.
+            xml_file (string): Path to XML file to parse for structure in the
+                               PDML format.
 
         '''
         # Populate structure from file or string parsing
