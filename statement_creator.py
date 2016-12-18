@@ -3,7 +3,7 @@
 '''
 from webapis import PDBData
 
-class DataSetMaker:
+class StatementCreator:
     '''Bla bla
 
     '''
@@ -18,10 +18,9 @@ class DataSetMaker:
 
             data_class.search()
 
-            print (type(data_class))
-            raise TypeError
+            data_parser = Parser(data_class)
             for data in data_class:
-                PDBParser(data)
+                data_parser(data) 
 
         
     def __init__(self):

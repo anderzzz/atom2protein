@@ -15,15 +15,15 @@ class Parser:
         '''Bla bla
 
         '''
-        self.parser(data)
+        return self.parser(data)
         
-    def __init__(self, data_type):
+    def __init__(self, data_type, *args):
         '''Bla bla
 
         '''
         if isinstance(data_type, PDBData):
-            self.parser = PDBParser()
+            self.parser = PDBParser(*args)
         elif isinstance(data_type, PubMedData):
             self.parser = None 
         else:
-            raise UnknownDataType('No parser exist for data type %s' %(type(data_type))
+            raise UnknownDataType('No parser exist for data type %s' %(type(data_type)))

@@ -3,8 +3,12 @@
 '''
 import xml.etree.ElementTree as etree
 from protein_structure import Atom, ProteinResidue, Residue, Chain, Structure
+from functools import partial
 
 class UnknownPDBType(Exception):
+    pass
+
+class UnknownFormatError(Exception):
     pass
 
 class PDBParser:
@@ -58,8 +62,11 @@ class PDBParser:
             xml_string (string): String of XML data in PDBML format.
 
         '''
-        self._populate_structure_from_xml(xml_string)
-        self._populate_experiment_from_xml(xml_string)
+        structure = self._populate_structure_from_xml(xml_string)
+        experiment = self._populate_experiment_from_xml(xml_string)
+        structure.set_experiment(experiment)
+
+        return structure
 
     def _populate_experiment_from_xml(self, xml_string):
         '''Bla bla
@@ -143,6 +150,8 @@ class PDBParser:
             # Add atom to current residue
             residue.add(residue_atom)
 
+        return structure
+
     def _populate_from_pdb(self, pdb_string):
         '''Populate a protein structure object from an PDB string. Currently
         not implemented.
@@ -152,23 +161,52 @@ class PDBParser:
                                   'not implemented. Consider the XML ' + \
                                   'version instead.') 
 
-    def __init__(self, xml_string=None, pdb_string=None, xml_file=None):
+    def _populate_from_xml_file(self, xml_path):
+        '''Bla bla
+
+        '''
+        with open(xml_path) as fin:
+            xml_string = fin.read()
+        return self._populate_from_xml(xml_string)
+
+    def _populate_from_pdb_file(self, pdb_path):
+        '''Bla bla
+
+        '''
+        with open(pdb_path) as fin:
+            pdb_string = fin.read()
+        return self._populate_from_pdb(pdb_string)
+
+    def __call__(self, data):
+        '''Call the initialized parser to process the data
+
+        Args:
+            data: the data to parse in a format as initialized
+
+        Returns: None
+
+        '''
+        return self.populator_method(data)
+
+    def __init__(self, data_format_signifier='xml_string'):
         '''Initialize the protein structure parser.
 
         Args:
-            xml_string (string): XML string of the structure in the PDML format.
-            pdb_string (string): String of the structure in the PDB format.
-            xml_file (string): Path to XML file to parse for structure in the
-                               PDML format.
+            data_format_signifier (string): A string that defines the format of
+                                            the structure data to be parsed.
+                                            Valid options are: 'xml_string',
+                                            'pdb_string', 'xml_file',
+                                            'pdb_file', where 'xml_string' is
+                                            default.
 
         '''
-        # Populate structure from file or string parsing
-        if not pdb_string is None:
-            self._populate_from_pdb(pdb_string)
-        if not xml_string is None:
-            self._populate_from_xml(xml_string)
-        if not xml_file is None:
-            with open(xml_file) as fin:
-                xml_data = fin.read()
-                self._populate_from_xml(xml_data)
-
+        if data_format_signifier == 'xml_string':
+            self.populator_method = self._populate_from_xml
+        elif data_format_signifier == 'pdb_string':
+            self.populator_method = self._populate_from_pdb
+        elif data_format_signifier == 'xml_file':
+            self.populator_method = self._populate_from_xml_file
+        elif data_format_signifier == 'pdb_file':
+            self.populator_method = self._populate_from_pdb_file
+        else:
+            raise UnknownFormatError('Unknown data format: %s' %(data_format_signifier))

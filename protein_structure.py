@@ -105,6 +105,12 @@ class Structure(StructureContainer):
     more Chain structure objects.
 
     '''
+    def set_experiment(self, experiment):
+        '''Bla bla
+
+        '''
+        self.experimental_data = experiment
+
     def __init__(self, label='dummy', experimental_data=None):
         '''Method to initialize the full protein structure object.
 
