@@ -60,7 +60,9 @@ def main(args):
     print (structure.child_objects)
 
     analyzer = StructureAnalyzer()
-    summary = analyzer(structure)
+    analyzer.cmp_nresidues(structure)
+    analyzer.cmp_nresidue_polarity(structure)
+    summary = analyzer.get_summary()
     print (summary)
 
 

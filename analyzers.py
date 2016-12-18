@@ -28,7 +28,7 @@ class StructureAnalyzer:
                     n_res_pol[polarity] = n
             ret[chain_label] = n_res_pol
 
-        return ret
+        self.summary_object.add('number of residues', ret) 
 
     def cmp_nresidues(self, structure):
         '''Bla bla
@@ -42,7 +42,7 @@ class StructureAnalyzer:
                     n_res += 1
             ret[chain_label] = n_res
 
-        return ret
+        self.summary_object.add('number of polarity residues', ret) 
 
     def get_summary(self):
         '''Bla bla
