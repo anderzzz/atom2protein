@@ -3,7 +3,8 @@ import time
 
 from webapis import PDBData
 from webapis import PubMedData
-from parsers import GeneralParser
+from parsers import Parser
+from analyzers import StructureAnalyzer
 
 def main(args):
 
@@ -52,11 +53,15 @@ def main(args):
 #        print (structure.label)
 #        print ([x.label for x in structure.child_objects])
 
-    data_parser = GeneralParser(PDBData(), 'xml_file')
+    data_parser = Parser(PDBData(), 'xml_file')
     print (data_parser)
     structure = data_parser('/home/anderzzz/ideas/protein/protein_3r0m.xml')
     print (structure.label)
     print (structure.child_objects)
+
+    analyzer = StructureAnalyzer()
+    summary = analyzer(structure)
+    print (summary)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 
 '''
 from webapis import PDBData
-from parsers import GeneralParser
+from parsers import Parser
 
 class StatementCreator:
     '''Bla bla
@@ -13,7 +13,7 @@ class StatementCreator:
 
         '''
         for data_class, data_methods in zip(self.class_container, self.methods):
-            data_parser = GeneralParser(data_class)
+            data_parser = Parser(data_class)
 
             for method in data_methods:
                 func = getattr(data_class, method)

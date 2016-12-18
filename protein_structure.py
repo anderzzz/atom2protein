@@ -144,6 +144,20 @@ class Residue(StructureContainer):
     atomic structure objects.
 
     '''
+    def is_protein_residue(self):
+        return False
+
+    def __str__(self):
+        '''How to present residue object as string
+
+        Args: None
+
+        Returns:
+            string_repr (string): String representation of residue.
+
+        '''
+        return 'Residue type %s of ID %s' %(self.residue_name_3lc, self.label)
+
     def __init__(self, name, residue_id, residue_insert='', description=None):
         '''Method to initialize the residue structure object.
 
@@ -226,6 +240,17 @@ class ProteinResidue(Residue):
 
         return code_pair_index[0]
 
+    def is_protein_residue(self):
+        '''Check if residue is a protein residue.
+
+        Args: None.
+
+        Returns:
+            yes_no (bool):
+
+        '''
+        return True
+
     def get_polarity(self, name):
         '''Retrieve the polarity class for a given protein residue type.
 
@@ -293,7 +318,7 @@ class ProteinResidue(Residue):
         '''
         super().__init__(name_3lc, residue_id + residue_insert)
         self.residue_name_1lc = self.code_convert(name_3lc)
-        self.residue_polarity_class = self.get_polarity(self.residue_name_3lc)
+        self.polarity_class = self.get_polarity(self.residue_name_3lc)
         self.secondary_structure = self._validate_ss(secondary_structure)
 
 class Atom:

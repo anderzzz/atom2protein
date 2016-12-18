@@ -333,7 +333,7 @@ class PubMedParser:
         else:
             raise UnknownFormatError('Unknown data format: %s' %(data_format_signifier))
 
-class GeneralParser:
+class Parser:
     '''Class for a general data type parser, where the specific parser is
     selected on basis of the data type. This is a simple 'wrapper' class to
     enable general use.
@@ -359,7 +359,7 @@ class GeneralParser:
             data_type (object): The object of the data to be parsed.
             args (tuple): Arguments to be passed to the specific parsers.
 
-        Returns: GeneralParser object
+        Returns: Parser object
 
         Raises:
             UnknownDataType: if class of given data object to be parsed is
