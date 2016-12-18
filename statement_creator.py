@@ -2,6 +2,7 @@
 
 '''
 from webapis import PDBData
+from parsers import GeneralParser
 
 class StatementCreator:
     '''Bla bla
@@ -12,15 +13,15 @@ class StatementCreator:
 
         '''
         for data_class, data_methods in zip(self.class_container, self.methods):
+            data_parser = GeneralParser(data_class)
+
             for method in data_methods:
                 func = getattr(data_class, method)
                 func(**data_methods[method])
-
             data_class.search()
 
-            data_parser = Parser(data_class)
             for data in data_class:
-                data_parser(data) 
+                data_object = data_parser(data) 
 
         
     def __init__(self):
@@ -29,5 +30,6 @@ class StatementCreator:
         '''
         self.class_container = [PDBData()]
         self.methods = [{'set_search_title' : {'val':'antibody'},
-                         'set_search_depositdate' : {'date_min':'20101201',
-                         'date_max':'20111201'}}]
+                         'set_search_title' : {'val':'HIV'},
+                         'set_search_resolution' : {'res_min':0.3,
+                         'res_max':1.5}}]

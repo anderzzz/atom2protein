@@ -3,9 +3,7 @@ import time
 
 from webapis import PDBData
 from webapis import PubMedData
-from pubmed_entity import PubMedCorpus
-from pdbparser import PDBParser
-from parsers import Parser
+from parsers import GeneralParser
 
 def main(args):
 
@@ -39,28 +37,26 @@ def main(args):
 #    xml_string = f.read()
 #    parser = PDBParser(xml_string=xml_string)
 
-    pdb_data = PDBData()
-    print ('a1')
-    pdb_data.set_search_title('antibody')
-    pdb_data.set_search_title('HIV')
-    pdb_data.set_search_resolution(0.3, 1.5)
-    print ('a2')
-    pdb_data.search()
-    print ('a3')
-    data_parser = Parser(pdb_data, 'xml_string')
-    print ('a4')
-    print (len(list(pdb_data)))
-    for data in pdb_data:
-        structure = data_parser(data)
-        print (structure)
-        print (structure.child_objects)
-        sys.exit()
+#    pdb_data = PDBData()
+#    print ('a1')
+#    pdb_data.set_search_title('antibody')
+#    pdb_data.set_search_title('HIV')
+#    pdb_data.set_search_resolution(0.3, 1.5)
+#    print ('a2')
+#    pdb_data.search()
+#    print ('a3')
+#    data_parser = Parser(pdb_data, 'xml_string')
+#    print ('a4')
+#    for data in pdb_data:
+#        structure = data_parser(data)
+#        print (structure.label)
+#        print ([x.label for x in structure.child_objects])
 
-#    data_parser = Parser(PDBData(), 'xml_file')
-#    print (data_parser)
-#    structure = data_parser('/home/anderzzz/ideas/protein/protein_3r0m.xml')
-#    print (structure.label)
-#    print (structure.child_objects)
+    data_parser = GeneralParser(PDBData(), 'xml_file')
+    print (data_parser)
+    structure = data_parser('/home/anderzzz/ideas/protein/protein_3r0m.xml')
+    print (structure.label)
+    print (structure.child_objects)
 
 
 if __name__ == '__main__':

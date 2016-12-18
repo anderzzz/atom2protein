@@ -1,11 +1,6 @@
 '''Bla bla
 
 '''
-import xml.etree.ElementTree as etree
-
-class XMLPathError(Exception):
-    pass
-
 class PMIDResetError(Exception):
     pass
 
@@ -70,46 +65,6 @@ class PubMedEntry:
         '''
         return self.pmid
 
-    def _get_and_check(self, root, path, default=''):
-        '''Bla bla
-
-        '''
-        element = root.find(path)
-        if element is None:
-            ret = default
-        else:
-            ret = element.text
-            if len(ret.strip()) == 0:
-                raise XMLPathError('The path %s returned empty text')
-
-        return ret
-
-    def _populate_from_xml(self, xml_string):
-        '''Bla bla
-
-        '''
-        root = etree.fromstring(xml_string)
-
-        medline_root = './PubmedArticle/MedlineCitation/'
-        article_root = medline_root + 'Article/'
-
-        self.set_pmid(self._get_and_check(root, 
-                      medline_root + 'PMID'))
-        self.set_journal_title(self._get_and_check(root, 
-                               article_root + 'Journal/Title')) 
-        self.set_journal_title_abbreviation(self._get_and_check(root,
-                                            article_root + 'Journal/ISOAbbreviation')) 
-        self.set_journal_volume(self._get_and_check(root,
-                                article_root + 'Journal/JournalIssue/Volume'))
-        self.set_journal_year(self._get_and_check(root,
-                              article_root + 'Journal/JournalIssue/PubDate/Year'))
-        self.set_article_title(self._get_and_check(root,
-                               article_root + 'ArticleTitle'))
-        self.set_article_abstract(self._get_and_check(root,
-                                  article_root + 'Abstract/AbstractText'))
-        self.set_journal_pages(self._get_and_check(root,
-                               article_root + 'Pagination/MedlinePgn'))
-
     def __str__(self):
         '''Bla bla
 
@@ -134,11 +89,11 @@ class PubMedEntry:
         '''
         return self.get_pmid()
 
-    def __init__(self, xml_rawdata):
+    def __init__(self, pmid=None):
         '''Bla bla
 
         '''
-        self.pmid = None
+        self.pmid = pmid
         self.article_title = None 
         self.article_abstract = None
         self.journal_title = None
@@ -147,19 +102,10 @@ class PubMedEntry:
         self.journal_year = None
         self.journal_pages = None
 
-        self._populate_from_xml(xml_rawdata) 
-
 class PubMedCorpus:
     '''Bla bla
 
     '''
-    def append(self, element):
-        '''Bla bla
-
-        '''
-        element_parsed = PubMedEntry(element)
-        self.container.add(element_parsed)
-
     def __iter__(self):
         '''Bla bla
 
