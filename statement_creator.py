@@ -4,6 +4,10 @@
 from webapis import PDBData
 from parsers import Parser
 
+from collections import namedtuple
+
+ActionSet = namedtuple('ActionSet', ['root', 'methods'])
+
 class StatementCreator:
     '''Bla bla
 
@@ -12,24 +16,35 @@ class StatementCreator:
         '''Bla bla
 
         '''
-        for data_class, data_methods in zip(self.class_container, self.methods):
-            data_parser = Parser(data_class)
+        for search, analyze in zip(self.search_stream, self.analyze_stream):
+            primitive_parser = Parser(search.root)
 
-            for method in data_methods:
-                func = getattr(data_class, method)
-                func(**data_methods[method])
-            data_class.search()
+            for method in search.methods:
+                func = getattr(search.root, method)
+                func(**search.root[method])
+            search.root.search()
 
-            for data in data_class:
-                data_object = data_parser(data) 
+            for data in search.root:
+                primitive = primitive_parser(data) 
+                for method in analyze.methods:
+                    func = getattr(analyze.root, method)
+                    func(**analyze.root[method])
+                summary = analyze.root.get_summary()
+
 
         
     def __init__(self):
         '''Bla bla
 
         '''
-        self.class_container = [PDBData()]
-        self.methods = [{'set_search_title' : {'val':'antibody'},
-                         'set_search_title' : {'val':'HIV'},
-                         'set_search_resolution' : {'res_min':0.3,
-                         'res_max':1.5}}]
+        self.search_stream = []
+        self.analyze_stream = []
+
+        action = ActionSet(PDBData(), {'set_search_title' : {'val':'antibody'},
+                                       'set_search_title' : {'val':'HIV'},
+                                       'set_search_resolution' : {'res_min':0.3,
+                                       'res_max':1.5}})
+        self.search_stream.append(action)
+        action = ActionSet(StructureAnalyzer(), {'cmp_nresidue' : {},
+                                                 'cmp_nresidue_polarity' : {}})
+        self.analyze_stream.append(action)

@@ -7,13 +7,13 @@ class StructureAnalyzer:
     '''Bla bla
 
     '''
-    def get_hydrogen_bonds(self, dist_cutoff=3.0, angle_cutoff=60.0):
+    def cmp_hydrogen_bonds(self, dist_cutoff=3.0, angle_cutoff=60.0):
         '''Bla bla
 
         '''
         pass
 
-    def get_nresidue_polarity(self, structure):
+    def cmp_nresidue_polarity(self, structure):
         '''Bla bla
 
         '''
@@ -30,7 +30,7 @@ class StructureAnalyzer:
 
         return ret
 
-    def get_nresidues(self, structure):
+    def cmp_nresidues(self, structure):
         '''Bla bla
 
         '''
@@ -44,14 +44,11 @@ class StructureAnalyzer:
 
         return ret
 
-    def __call__(self, structure_object):
+    def get_summary(self):
         '''Bla bla
 
         '''
-        n_res = self.get_nresidues(structure_object) 
-        print (n_res)
-        n_res_pol = self.get_nresidue_polarity(structure_object)
-        print (n_res_pol)
+        return self.summary_object
 
     def __init__(self):
         '''Bla bla
