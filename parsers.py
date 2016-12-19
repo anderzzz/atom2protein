@@ -3,8 +3,8 @@
 '''
 import xml.etree.ElementTree as etree
 
-from webapis import PDBData, PubMedData
-from protein_structure import Atom, ProteinResidue, Residue, Chain, Structure
+from rootdata import PDBData, PubMedData
+from primitivedata import Atom, ProteinResidue, Residue, Chain, Structure
 
 class UnknownDataType(Exception):
     pass

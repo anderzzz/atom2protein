@@ -1,8 +1,7 @@
 '''Bla bla
 
 '''
-from protein_structure import Structure
-from pubmed_entity import PubMedEntry
+from primitivedata import Structure, PubMedEntry
 from analyzers import StructureAnalyzer
 
 import json

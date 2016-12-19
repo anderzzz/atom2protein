@@ -1,8 +1,9 @@
 '''Bla bla
 
 '''
-from webapis import PDBData
+from rootdata import PDBData
 from parsers import Parser
+from summaries import Summarizer
 
 from collections import namedtuple
 
