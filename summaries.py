@@ -5,6 +5,7 @@ object oriented... in some way.
 '''
 from protein_structure import Structure
 from pubmed_entity import PubMedEntry
+from analyzers import StructureAnalyzer
 
 import json
 from collections import namedtuple

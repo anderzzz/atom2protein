@@ -4,7 +4,7 @@ import time
 from webapis import PDBData
 from webapis import PubMedData
 from parsers import Parser
-from analyzers import StructureAnalyzer
+from summaries import StructureSummarizer
 
 def main(args):
 
@@ -59,12 +59,12 @@ def main(args):
     print (structure.label)
     print (structure.child_objects)
 
-    analyzer = StructureAnalyzer()
-    analyzer.cmp_nresidues(structure)
-    analyzer.cmp_nresidue_polarity(structure)
-    summary = analyzer.get_summary()
-    print (summary)
-    print (summary.nres_per_chain, summary.nres_per_chain_polarity)
+    summarizer = StructureSummarizer()
+    summarizer.set_nresidues(structure)
+    summarizer.set_nresidues_polarity(structure)
+    print (summarizer)
+    print (summarizer.nresidues, summarizer.nresidues_polarity)
+    print (summarizer.nresidues.value)
 
 
 if __name__ == '__main__':

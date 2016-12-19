@@ -1,8 +1,6 @@
 '''Bla bla
 
 '''
-from summaries import StructureSummary
-
 class StructureAnalyzer:
     '''Bla bla
 
@@ -13,7 +11,7 @@ class StructureAnalyzer:
         '''
         pass
 
-    def cmp_nresidue_polarity(self, structure):
+    def cmp_nresidues_polarity(self, structure):
         '''Bla bla
 
         '''
