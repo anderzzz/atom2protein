@@ -7,7 +7,7 @@ class StructureAnalyzer:
     '''Bla bla
 
     '''
-    def cmp_hydrogen_bonds(self, dist_cutoff=3.0, angle_cutoff=60.0):
+    def cmp_hydrogen_bonds(self, structure):
         '''Bla bla
 
         '''
@@ -28,7 +28,7 @@ class StructureAnalyzer:
                     n_res_pol[polarity] = n
             ret[chain_label] = n_res_pol
 
-        self.summary_object.add('number of residues', ret) 
+        return ret 
 
     def cmp_nresidues(self, structure):
         '''Bla bla
@@ -42,19 +42,14 @@ class StructureAnalyzer:
                     n_res += 1
             ret[chain_label] = n_res
 
-        self.summary_object.add('number of polarity residues', ret) 
+        return ret 
 
-    def get_summary(self):
+    def __init__(self, hbond_dcutoff=3.0, hbond_acutoff=60.0):
         '''Bla bla
 
         '''
-        return self.summary_object
-
-    def __init__(self):
-        '''Bla bla
-
-        '''
-        self.summary_object = StructureSummary()
+        self.hbond_dcutoff = hbond_dcutoff
+        self.hbond_acutoff = hbond_acutoff
 
 class Analyzer:
     '''Bla bla

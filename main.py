@@ -64,6 +64,7 @@ def main(args):
     analyzer.cmp_nresidue_polarity(structure)
     summary = analyzer.get_summary()
     print (summary)
+    print (summary.nres_per_chain, summary.nres_per_chain_polarity)
 
 
 if __name__ == '__main__':

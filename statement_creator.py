@@ -6,8 +6,6 @@ from parsers import Parser
 
 from collections import namedtuple
 
-ActionSet = namedtuple('ActionSet', ['root', 'methods'])
-
 class StatementCreator:
     '''Bla bla
 
@@ -16,20 +14,20 @@ class StatementCreator:
         '''Bla bla
 
         '''
-        for search, analyze in zip(self.search_stream, self.analyze_stream):
-            primitive_parser = Parser(search.root)
+        for k_run, root_obj in enumerate(self.root):
+            for search_method in self.search_stream:
+                func = getattr(root_obj, search_method)
+                func(**self.search_stream[search_method])
+            root_obj.search()
 
-            for method in search.methods:
-                func = getattr(search.root, method)
-                func(**search.root[method])
-            search.root.search()
-
-            for data in search.root:
+            primitive_parser = Parser(root_obj)
+            for data in root_obj:
                 primitive = primitive_parser(data) 
-                for method in analyze.methods:
-                    func = getattr(analyze.root, method)
-                    func(**analyze.root[method])
-                summary = analyze.root.get_summary()
+                summarizer = Summarizer(primitive, **self.summarize_init[k_run])
+                for summary_method in self.summarize_stream:
+                    func = getattr(summarizer, summary_method)
+                    func(primitive)
+                print (summarizer)
 
 
         
@@ -37,14 +35,15 @@ class StatementCreator:
         '''Bla bla
 
         '''
+        self.root = [] 
         self.search_stream = []
-        self.analyze_stream = []
+        self.summarize_init = []
+        self.summarize_stream = []
 
-        action = ActionSet(PDBData(), {'set_search_title' : {'val':'antibody'},
-                                       'set_search_title' : {'val':'HIV'},
-                                       'set_search_resolution' : {'res_min':0.3,
-                                       'res_max':1.5}})
-        self.search_stream.append(action)
-        action = ActionSet(StructureAnalyzer(), {'cmp_nresidue' : {},
-                                                 'cmp_nresidue_polarity' : {}})
-        self.analyze_stream.append(action)
+        self.root.append(PDBData())
+        self.search_stream.append({'set_search_title' : {'val':'antibody'},
+                                   'set_search_title' : {'val':'HIV'},
+                                   'set_search_resolution' : {'res_min':0.3,
+                                   'res_max':1.5}})
+        self.summarize_init.append({})
+        self.summarize_stream.append(['set_nresidue', 'set_nresidue_polarity'])
