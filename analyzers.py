@@ -1,6 +1,8 @@
 '''Bla bla
 
 '''
+import numpy as np
+
 class StructureAnalyzer:
     '''Bla bla
 
@@ -11,6 +13,28 @@ class StructureAnalyzer:
         '''
         pass
 
+    def cmp_bfactor_chain_stat(self, structure):
+        '''Bla bla
+
+        '''
+        ret = {}
+        for chain_label, chain in structure.items():
+            data_array = []
+            for residue_label, residue in chain.items():
+                if residue.is_protein_residue():
+                    for atom_label, atom in residue.items():
+                        data_array.append(atom.bfactor)
+
+            vals = {}
+            for stat_val in self.stat_cmp:
+                func = getattr(np, stat_val)
+                v = func(data_array)
+                vals[stat_val] = v
+            
+            ret[chain_label] = vals
+
+        return ret
+                        
     def cmp_nresidues_polarity(self, structure):
         '''Bla bla
 
@@ -42,12 +66,14 @@ class StructureAnalyzer:
 
         return ret 
 
-    def __init__(self, hbond_dcutoff=3.0, hbond_acutoff=60.0):
+    def __init__(self, hbond_dcutoff=3.0, hbond_acutoff=60.0, 
+                 stat_cmp=['amin','amax','median','mean','std']):
         '''Bla bla
 
         '''
         self.hbond_dcutoff = hbond_dcutoff
         self.hbond_acutoff = hbond_acutoff
+        self.stat_cmp = stat_cmp 
 
 class Analyzer:
     '''Bla bla

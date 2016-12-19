@@ -59,12 +59,14 @@ def main(args):
     print (structure.label)
     print (structure.child_objects)
 
-    summarizer = StructureSummarizer()
+    summarizer = StructureSummarizer(stat_cmp=['mean'])
     summarizer.set_nresidues(structure)
     summarizer.set_nresidues_polarity(structure)
+    summarizer.set_bfactor_chain_stat(structure)
     print (summarizer)
     print (summarizer.nresidues, summarizer.nresidues_polarity)
     print (summarizer.nresidues.value)
+    print (summarizer.bfactor_chain_stat)
 
 
 if __name__ == '__main__':

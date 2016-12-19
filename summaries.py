@@ -1,7 +1,5 @@
 '''Bla bla
 
-How to make this nice and general for the statistics module? Lets go full blown
-object oriented... in some way.
 '''
 from protein_structure import Structure
 from pubmed_entity import PubMedEntry
@@ -25,6 +23,13 @@ class StructureSummarizer:
         '''
         pass
 
+    def set_bfactor_chain_stat(self, structure):
+        '''Bla bla
+
+        '''
+        value = self.analyzer.cmp_bfactor_chain_stat(structure)
+        self.bfactor_chain_stat = Entry('B-factor chain statistics', value, None)
+
     def set_nresidues(self, structure):
         '''Bla bla
 
@@ -47,6 +52,7 @@ class StructureSummarizer:
 
         self.nresidues = None
         self.nresidues_polarity = None
+        self.bfactor_chain_stat = None
 
 class PubMedSummarizer:
     '''Bla bla
