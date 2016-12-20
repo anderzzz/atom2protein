@@ -22,6 +22,12 @@ class StructureSummarizer:
         '''
         pass
 
+    def make_pandas(self):
+        '''Bla bla
+
+        '''
+        pass
+
     def set_bfactor_chain_stat(self, structure):
         '''Bla bla
 
@@ -43,12 +49,19 @@ class StructureSummarizer:
         value = self.analyzer.cmp_nresidues_polarity(structure)
         self.nresidues_polarity = Entry('number of polarity residues', value, None)
 
+    def set_label(self, label):
+        '''Bla bla
+
+        '''
+        self.label = label
+
     def __init__(self, **kwargs):
         '''Bla bla
 
         '''
         self.analyzer = StructureAnalyzer(**kwargs)
 
+        self.label = None
         self.nresidues = None
         self.nresidues_polarity = None
         self.bfactor_chain_stat = None

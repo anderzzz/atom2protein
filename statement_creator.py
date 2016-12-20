@@ -21,16 +21,19 @@ class StatementCreator:
                 func(**self.search_stream[search_method])
             root_obj.search()
 
+            summary_collection = []
             primitive_parser = Parser(root_obj)
             for data in root_obj:
                 primitive = primitive_parser(data) 
                 summarizer = Summarizer(primitive, **self.summarize_init[k_run])
+                summarizer.set_label(primitive.label)
                 for summary_method in self.summarize_stream:
                     func = getattr(summarizer, summary_method)
                     func(primitive)
-                print (summarizer)
+                summary_collection.append(summarizer)
 
-
+            ensemble_stat = EnsembleStat(make_graphics=True, **self.stat_init[k_run])
+            ensemble_stat(summary_collection)
         
     def __init__(self):
         '''Bla bla
