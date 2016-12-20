@@ -1,7 +1,12 @@
 '''Bla bla
 
 '''
+import itertools
+
 class PMIDResetError(Exception):
+    pass
+
+class LevelError(Exception):
     pass
 
 class StructureContainer:
@@ -92,6 +97,46 @@ class StructureContainer:
         for child_object in self.child_objects:
             yield child_object.label
 
+    def flatten(self, level, label_train=[], value_train=[]):
+        '''Method to flatten a container.
+
+        Args: 
+            level (int): How many levels lower to flatten it. If set to 1 it is
+                         logically equivalent to method 'items'.
+            label_train (list, optional): Labels to recursively add to. Should
+                                          not be used in a call by user.
+            value_train (list, optional): Values to recursively add to. Should
+                                          not be used in a call by user.
+
+        Returns:
+            flat_data (list): List of tuples where first element of tuple is a
+                              tuple of object labels, and second element is the
+                              object at the requested level.
+
+        Raises:
+            LevelError: In case the requested level is greater than the level
+                        needed to reach atomic objects.
+
+        '''
+        ret = value_train
+        level_iter = level - 1
+        label_list = label_train
+        for label, value in self.items():
+            if level_iter == 0:
+                label_out = tuple(label_list + [label])
+                ret.append((label_out, value))
+            else:
+                label_list = label_train + [label]
+                try:
+                    ret = value.flatten(level=level_iter, label_train=label_list,
+                                                          value_train=ret) 
+                except AttributeError:
+                    err_level = str(level_iter)
+                    raise LevelError('Too deep level requested. With additional ' + \
+                                     '%s level(s), atomic object encountered' %(err_level)) 
+
+        return ret
+
     def __init__(self, label):
         '''Method to initialize the general structure container object.
 
@@ -113,6 +158,20 @@ class Structure(StructureContainer):
 
         '''
         self.experimental_data = experiment
+
+    def flatitems(self, level=0):
+        '''Bla bla
+
+        '''
+        for chain_label, chain in self.items():
+            label_root = [chain_label]
+            for residue_label, residue in chain.items():
+                label = label_root + [residue_label]
+                item_of_interest = residue
+                print (tuple(label), item_of_interest)
+
+
+        raise TypeError
 
     def __init__(self, label='dummy', experimental_data=None):
         '''Method to initialize the full protein structure object.
