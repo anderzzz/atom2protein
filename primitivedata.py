@@ -60,6 +60,35 @@ class StructureContainer:
         for child_object in self.child_objects:
             yield (child_object.label, child_object)
 
+    def unravel(self, level):
+        '''Method to unravel a hierarchy of a structure container at a set
+        level. Level equal to one is the same has the method items().
+
+        Args:
+            level (int): The number of levels to unravel of the container.
+
+        Returns:
+            objects (list): List of tuples, where the first element of tuple is
+                            the combined structure label, where the second
+                            element of tuple is the unravelled structure
+                            object.
+
+        '''
+        def recurse(current, keys, dep):
+            dep_new = dep - 1
+            new_key = keys
+            if dep_new == 0:
+                coll.append((tuple(keys), current))
+                return True
+            for lab, val in current.items():
+                recurse(val, new_key + [lab], dep_new)
+
+        coll = []
+        for lab, val in self.items():
+            recurse(val, [lab], level)
+
+        return coll
+
     def __getitem__(self, key):
         '''Method to obtain structure child object by string key.
 
@@ -96,64 +125,6 @@ class StructureContainer:
         '''
         for child_object in self.child_objects:
             yield child_object.label
-
-#    def flatten(self, level, label_train=[], value_train=[]):
-#        '''Method to flatten a container.
-#
-#        Args: 
-#            level (int): How many levels lower to flatten it. If set to 1 it is
-#                         logically equivalent to method 'items'.
-#            label_train (list, optional): Labels to recursively add to. Should
-#                                          not be used in a call by user.
-#            value_train (list, optional): Values to recursively add to. Should
-#                                          not be used in a call by user.
-#
-#        Returns:
-#            flat_data (list): List of tuples where first element of tuple is a
-#                              tuple of object labels, and second element is the
-#                              object at the requested level.
-#
-#        Raises:
-#            LevelError: In case the requested level is greater than the level
-#                        needed to reach atomic objects.
-#
-#        '''
-#        ret = value_train
-#        level_iter = level - 1
-#        label_list = label_train
-#        for label, value in self.items():
-#            print ('qq', label, level_iter, ret)
-#            if level_iter == 0:
-#                label_out = tuple(label_list + [label])
-#                ret.append((label_out, value))
-#            else:
-#                label_list = label_train + [label]
-#                try:
-#                    ret = value.flatten(level=level_iter, label_train=label_list,
-#                                                          value_train=ret) 
-#                except AttributeError:
-#                    err_level = str(level_iter)
-#                    raise LevelError('Too deep level requested. With additional ' + \
-#                                     '%s level(s), atomic object encountered' %(err_level)) 
-#
-#        return ret
-
-    def flatten(self, level):
-
-        def recurse(current, keys, dep):
-            dep_new = dep - 1
-            new_key = keys
-            if dep_new == 0:
-                coll.append((tuple(keys), current))
-                return True
-            for lab, val in current.items():
-                recurse(val, new_key + [lab], dep_new)
-
-        coll = []
-        for lab, val in self.items():
-            recurse(val, [lab], level)
-
-        return coll
 
     def __init__(self, label):
         '''Method to initialize the general structure container object.
