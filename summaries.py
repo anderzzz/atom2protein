@@ -28,6 +28,16 @@ class StructureSummarizer:
         '''
         pass
 
+    def get_entries(self):
+        '''Bla bla
+
+        '''
+        public_attributes = [x for x in dir(self) if x[0] != '_']
+        for attribute in public_attributes:
+            whatweget = getattr(self, attribute)
+            if isinstance(whatweget, Entry):
+                yield whatweget
+
     def set_bfactor_chain_stat(self, structure):
         '''Bla bla
 

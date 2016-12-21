@@ -1,11 +1,14 @@
 import sys
 import time
+import json
 import numpy as np
+import pprint
 
 from rootdata import PDBData, PubMedData
 from parsers import Parser
 from summaries import StructureSummarizer
 from ensemble_stat import EnsembleStat
+from visualizers import Visualizer
 
 def main(args):
 
@@ -22,7 +25,9 @@ def main(args):
         summarizer.set_nresidues_polarity(structure)
         summarizer.set_bfactor_chain_stat(structure)
 
-        print (summarizer)
+        vis = Visualizer()
+        vis(summarizer)
+        raise TypeError
         collector.append(summarizer)
 
     ensemble_stat = EnsembleStat()
