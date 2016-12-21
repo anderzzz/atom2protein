@@ -22,6 +22,7 @@ def main(args):
         summarizer.set_nresidues_polarity(structure)
         summarizer.set_bfactor_chain_stat(structure)
 
+        print (summarizer)
         collector.append(summarizer)
 
     ensemble_stat = EnsembleStat()

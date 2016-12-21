@@ -33,23 +33,30 @@ class StructureAnalyzer:
 
         '''
         ret = {}
-        for chain_label, chain in structure.items():
+        for label, chain in structure.unravel(level=1):
             data_array = []
             for residue_label, residue in chain.items():
                 if residue.is_protein_residue():
                     for atom_label, atom in residue.items():
                         data_array.append(atom.bfactor)
 
-            ret[chain_label] = self._statify(data_array) 
+            stat_props = self._statify(data_array) 
+            for stat_prop in stat_props:
+                key = tuple([x for x in label] + [stat_prop])
+                ret[key] = stat_props[stat_prop]
 
-        return DataFrame.from_dict(ret)
+        inds = pd.MultiIndex.from_tuples(ret.keys(), names=['chain', 'B-factor property'])
+        df = pd.Series(ret, index=inds, name='property statistics')
+        df.sort_index(inplace=True)
+
+        return df 
                         
     def cmp_nresidues_polarity(self, structure):
         '''Bla bla
 
         '''
         ret = {} 
-        for label, chain in structure.flatten(level=1):
+        for label, chain in structure.unravel(level=1):
             for residue_label, residue in chain.items():
                 if residue.is_protein_residue():
                     polarity = residue.polarity_class
@@ -57,35 +64,28 @@ class StructureAnalyzer:
                     count = ret.setdefault(key, 0)
                     count += 1
                     ret[key] = count
-                    print ('aa', label, residue_label, polarity, count)
 
-        iii = pd.MultiIndex.from_tuples(ret.keys())
-        print (iii)
-        df = pd.Series(ret, index=iii)
+        inds = pd.MultiIndex.from_tuples(ret.keys(), names=['chain', 'property'])
+        df = pd.Series(ret, index=inds, name='residue count')
         df.sort_index(inplace=True)
-        print (df)
-        raise TypeError 
-        df = pd.DataFrame(ret, index=iii)
-        print (df)
-        raise TypeError
 
-        return DataFrame.from_dict(ret)
+        return df 
 
     def cmp_nresidues(self, structure):
         '''Bla bla
 
         '''
         ret = {}
-        for label, chain in structure.flatten(level=1):
+        for label, chain in structure.unravel(level=1):
             for residue_label, residue in chain.items():
                 if residue.is_protein_residue():
-                    key = tuple([x for x in label] + ['count'])
+                    key = tuple([x for x in label] + ['total count']) 
                     count = ret.setdefault(key, 0)
                     count += 1
                     ret[key] = count
 
-        iii = pd.MultiIndex.from_tuples(ret.keys())
-        df = pd.Series(ret, index=iii)
+        inds = pd.MultiIndex.from_tuples(ret.keys(), names=['chain', 'property'])
+        df = pd.Series(ret, index=inds, name='residue count')
         df.sort_index(inplace=True)
 
         return df 
