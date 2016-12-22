@@ -10,7 +10,23 @@ from collections import namedtuple
 class UnknownDataType(Exception):
     pass
 
-Entry = namedtuple('Entry', ['key','value','description'])
+class Entry:
+    '''Bla bla
+
+    '''
+    def unpack_value(self):
+        '''Bla bla
+
+        '''
+        return self.value
+
+    def __init__(self, key, value, description=None):
+        '''Bla bla
+
+        '''
+        self.key = key
+        self.value = value
+        self.description = description
 
 class StructureSummarizer:
     '''Bla bla
@@ -45,12 +61,24 @@ class StructureSummarizer:
         value = self.analyzer.cmp_bfactor_chain_stat(structure)
         self.bfactor_chain_stat = Entry('B-factor chain statistics', value, None)
 
+    def get_bfactor_chain_stat(self):
+        '''Bla bla
+
+        '''
+        return self.bfactor_chain_stat
+
     def set_nresidues(self, structure):
         '''Bla bla
 
         '''
         value = self.analyzer.cmp_nresidues(structure)
         self.nresidues = Entry('number of residues', value, None)
+
+    def get_nresidues(self):
+        '''Bla bla
+
+        '''
+        return self.nresidues
 
     def set_nresidues_polarity(self, structure):
         '''Bla bla
@@ -59,11 +87,35 @@ class StructureSummarizer:
         value = self.analyzer.cmp_nresidues_polarity(structure)
         self.nresidues_polarity = Entry('number of polarity residues', value, None)
 
+    def get_nresidues_polarity(self):
+        '''Bla bla
+
+        '''
+        return self.nresidues_polarity
+
+    def unpack_nresidues_polarity(self):
+        '''Bla bla
+
+        '''
+        return self.nresidues_polarity.unpack_value()
+
     def set_label(self, label):
         '''Bla bla
 
         '''
         self.label = label
+
+    def get_label(self):
+        '''Bla bla
+
+        '''
+        return self.label
+
+    def unpack_attribute(self, get_function):
+        '''Bla bla
+
+        '''
+        return get_function().unpack_value()
 
     def __init__(self, **kwargs):
         '''Bla bla
@@ -75,7 +127,7 @@ class StructureSummarizer:
         self.nresidues = None
         self.nresidues_polarity = None
         self.bfactor_chain_stat = None
-
+        
 class PubMedSummarizer:
     '''Bla bla
 

@@ -14,7 +14,7 @@ def main(args):
 
     data_parser = Parser(PDBData(), 'xml_file')
     path = '/home/anderzzz/ideas/protein/'
-    pdb_files = ['protein_3r0m.xml', 'protein_3tv3.xml']
+    pdb_files = ['protein_3tv3.xml', 'protein_3r0m.xml']
     collector = []
     for pdb_file in pdb_files:
         structure = data_parser(path + pdb_file)
@@ -25,8 +25,11 @@ def main(args):
         summarizer.set_nresidues_polarity(structure)
         summarizer.set_bfactor_chain_stat(structure)
 
-        vis = Visualizer()
-        vis(summarizer)
+        vis = Visualizer(pdb_file + '.html')
+        vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
+                         x_axis='chain', y_axis='residue count',
+                         stack='property', title='dummy')
+        vis.make_html('/mnt/c/Users/Anders/Desktop/tmp2.html')
         raise TypeError
         collector.append(summarizer)
 
