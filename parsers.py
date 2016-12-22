@@ -156,6 +156,7 @@ class PDBParser:
 
             # Add atom to current residue
             residue.add(residue_atom)
+        structure.add(chain)
 
         return structure
 
