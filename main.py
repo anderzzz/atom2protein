@@ -25,6 +25,11 @@ def main(args):
         summarizer.set_nresidues_polarity(structure)
         summarizer.set_bfactor_chain_stat(structure)
 
+        print (summarizer.unpack_nresidues_polarity())
+        print (summarizer.unpack_nresidues_polarity)
+        print (summarizer.unpack_bfactor_chain_stat())
+        print (summarizer.unpack_bfactor_chain_stat)
+        raise TypeError
         vis = Visualizer(pdb_file + '.html')
         vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
                          x_axis='chain', y_axis='residue count',

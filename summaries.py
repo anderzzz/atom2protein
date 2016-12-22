@@ -93,12 +93,6 @@ class StructureSummarizer:
         '''
         return self.nresidues_polarity
 
-    def unpack_nresidues_polarity(self):
-        '''Bla bla
-
-        '''
-        return self.nresidues_polarity.unpack_value()
-
     def set_label(self, label):
         '''Bla bla
 
@@ -111,11 +105,15 @@ class StructureSummarizer:
         '''
         return self.label
 
-    def unpack_attribute(self, get_function):
+    def _unpack(self, get_function):
         '''Bla bla
 
         '''
-        return get_function().unpack_value()
+        def wrapper():
+            output = get_function()
+            return output.unpack_value()
+
+        return wrapper
 
     def __init__(self, **kwargs):
         '''Bla bla
@@ -127,6 +125,10 @@ class StructureSummarizer:
         self.nresidues = None
         self.nresidues_polarity = None
         self.bfactor_chain_stat = None
+
+        self.unpack_nresidues_polarity = self._unpack(self.get_nresidues_polarity)
+        self.unpack_nresidues = self._unpack(self.get_nresidues)
+        self.unpack_bfactor_chain_stat = self._unpack(self.get_bfactor_chain_stat)
         
 class PubMedSummarizer:
     '''Bla bla
