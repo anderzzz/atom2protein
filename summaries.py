@@ -54,11 +54,24 @@ class StructureSummarizer:
             if isinstance(whatweget, Entry):
                 yield whatweget
 
+    def set_bb_torsions(self, structure):
+        '''Bla bla
+
+        '''
+        value = self.calculator.cmp_bb_torsions(structure)
+        self.bb_torsions = Entry('Backbone torsions', value, None)
+
+    def get_bb_torsions(self):
+        '''Bla bla
+
+        '''
+        return self.bb_torsions
+
     def set_bfactor_chain_stat(self, structure):
         '''Bla bla
 
         '''
-        value = self.analyzer.cmp_bfactor_chain_stat(structure)
+        value = self.calculator.cmp_bfactor_chain_stat(structure)
         self.bfactor_chain_stat = Entry('B-factor chain statistics', value, None)
 
     def get_bfactor_chain_stat(self):
@@ -71,7 +84,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.analyzer.cmp_nresidues(structure)
+        value = self.calculator.cmp_nresidues(structure)
         self.nresidues = Entry('number of residues', value, None)
 
     def get_nresidues(self):
@@ -84,7 +97,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.analyzer.cmp_nresidues_polarity(structure)
+        value = self.calculator.cmp_nresidues_polarity(structure)
         self.nresidues_polarity = Entry('number of polarity residues', value, None)
 
     def get_nresidues_polarity(self):
@@ -119,7 +132,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        self.analyzer = StructureCalculator(**kwargs)
+        self.calculator = StructureCalculator(**kwargs)
 
         self.label = None
         self.nresidues = None
@@ -129,6 +142,7 @@ class StructureSummarizer:
         self.unpack_nresidues_polarity = self._unpack(self.get_nresidues_polarity)
         self.unpack_nresidues = self._unpack(self.get_nresidues)
         self.unpack_bfactor_chain_stat = self._unpack(self.get_bfactor_chain_stat)
+        self.unpack_bb_torsions = self._unpack(self.get_bb_torsions)
         
 class PubMedSummarizer:
     '''Bla bla
