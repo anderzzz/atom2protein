@@ -2,7 +2,7 @@
 
 '''
 from primitivedata import Structure, PubMedEntry
-from analyzers import StructureAnalyzer
+from calculators import StructureCalculator
 
 import json
 from collections import namedtuple
@@ -119,7 +119,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        self.analyzer = StructureAnalyzer(**kwargs)
+        self.analyzer = StructureCalculator(**kwargs)
 
         self.label = None
         self.nresidues = None

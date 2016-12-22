@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 
-class StructureAnalyzer:
+class StructureCalculator:
     '''Bla bla
 
     '''
@@ -100,7 +100,7 @@ class StructureAnalyzer:
         self.hbond_acutoff = hbond_acutoff
         self.stat_cmp = stat_cmp 
 
-class Analyzer:
+class Calculator:
     '''Bla bla
 
     '''
