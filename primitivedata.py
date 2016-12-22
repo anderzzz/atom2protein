@@ -165,6 +165,22 @@ class Chain(StructureContainer):
     one or more Residue or ProteinResidue objects.
 
     '''
+    def get_backbone(self):
+        '''Method to return a list of backbone atoms in the chain.
+
+        Args: None.
+
+        Returns:
+            backbone (list):
+
+        '''
+        container = []
+        for residue_label, residue in self.items():
+            if residue.is_protein_residue():
+                container.append((residue_label, residue.get_backbone_atoms()))
+
+        return container
+
     def __init__(self, label, bio_content=None):
         '''Method to initialize the chain structure object.
 
@@ -183,6 +199,12 @@ class Residue(StructureContainer):
     '''
     def is_protein_residue(self):
         return False
+
+    def get_backbone_atoms(self):
+        return []
+
+    def get_sidechain_atoms(self):
+        return []
 
     def __str__(self):
         '''How to present residue object as string
@@ -287,6 +309,40 @@ class ProteinResidue(Residue):
 
         '''
         return True
+
+    def get_backbone_atoms(self):
+        '''Return the backbone atoms of the residue.
+
+        Args: None
+
+        Returns:
+            bb_atoms (list): List of backbone atom objects of residue.
+
+        '''
+        container = []
+        for atom_label, atom in self.items():
+            if atom_label in ['c', 'o', 'n', 'ca']:
+                container.append(atom)
+
+        return container
+
+    def get_sidechain_atoms(self):
+        '''Return the sidechain atoms of the residue.
+
+        Args: None
+
+        Returns:
+            sc_atoms (list): List of sidechain atom objects of residue.
+
+        '''
+        bb_atom_labels = [x.label for x in self.get_backbone_atoms()]
+
+        container = []
+        for atom_label, atom in self.items():
+            if atom_label in bb_atom_label:
+                container.append(atom)
+
+        return container
 
     def get_polarity(self, name):
         '''Retrieve the polarity class for a given protein residue type.
