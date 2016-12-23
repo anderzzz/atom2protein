@@ -2,8 +2,8 @@
 
 '''
 from bokeh.charts import Bar, output_file, show 
-from bokeh.plotting import figure
-from bokeh.models import Range1d
+from bokeh.plotting import figure, ColumnDataSource
+from bokeh.models import Range1d, HoverTool
 import pandas as pd
 
 class Visualizer:
@@ -19,15 +19,26 @@ class Visualizer:
         p = Bar(df_columnwise, label=x_axis, stack=stack, values=y_axis, title=title)
         self.graph_object = p
 
-    def scatter_plot(self, df, x_axis, y_axis, x_range=None, y_range=None,
+    def scatter_plot(self, df, x_axis, y_axis, level_name, x_range=None, y_range=None,
                      title=None):
         '''Bla bla
 
         '''
-        print (df)
-        df_psi = df[df.loc['property'] == 'psi']
-        print (df_psi)
-        raise TypeError
+        df_x = df.xs(x_axis, level=level_name)
+        df_y = df.xs(y_axis, level=level_name)
+        index_ids = df_x.index.values
+        index_ids = [chain + '/' + str(id_val) for chain, id_val in index_ids]
+        x_data = df_x.values
+        y_data = df_y.values
+
+        source = ColumnDataSource(data=dict(
+                                  x = x_data, y = y_data,
+                                  desc = index_ids,))
+        hover = HoverTool(tooltips=[('(x,y)','(@x, @y)'),
+                                   ('desc','@desc')])
+        p = figure(tools=[hover])
+        p.circle('x', 'y', size=10, source=source)
+        self.graph_object = p
 
     def make_html(self, fileout_path):
         '''Bla bla
