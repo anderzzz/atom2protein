@@ -106,6 +106,19 @@ class StructureSummarizer:
         '''
         return self.nresidues_polarity
 
+    def set_rresidues_polarity(self, structure):
+        '''Bla bla
+
+        '''
+        value = self.calculator.cmp_rresidues_polarity(structure)
+        self.rresidues_polarity = Entry('percentage of polarity residues', value, None)
+
+    def get_rresidues_polarity(self):
+        '''Bla bla
+
+        '''
+        return self.rresidues_polarity
+
     def set_label(self, label):
         '''Bla bla
 
@@ -137,9 +150,11 @@ class StructureSummarizer:
         self.label = None
         self.nresidues = None
         self.nresidues_polarity = None
+        self.rresidues_polarity = None
         self.bfactor_chain_stat = None
 
         self.unpack_nresidues_polarity = self._unpack(self.get_nresidues_polarity)
+        self.unpack_rresidues_polarity = self._unpack(self.get_rresidues_polarity)
         self.unpack_nresidues = self._unpack(self.get_nresidues)
         self.unpack_bfactor_chain_stat = self._unpack(self.get_bfactor_chain_stat)
         self.unpack_bb_torsions = self._unpack(self.get_bb_torsions)

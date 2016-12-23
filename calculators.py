@@ -43,6 +43,20 @@ class StructureCalculator:
 
         return ret
 
+    def _relative(self, df, by_level=0):
+        '''Bla bla
+
+        '''
+        group_by = df.groupby(level=by_level)
+        sum_data = group_by.sum()
+
+        ret = []
+        for level_name, sub_df in group_by:
+            normed = sub_df.div(sum_data[level_name])
+            ret.append(normed)
+
+        return pd.concat(ret)
+
     def cmp_hydrogen_bonds(self, structure):
         '''Bla bla
 
@@ -91,6 +105,15 @@ class StructureCalculator:
         df.sort_index(inplace=True)
 
         return df 
+
+    def cmp_rresidues_polarity(self, structure):
+        '''Bla bla
+
+        '''
+        df = self.cmp_nresidues_polarity(structure)
+        df_normed_per_chain = self._relative(df, by_level=0)
+        
+        return df_normed_per_chain
 
     def cmp_nresidues(self, structure):
         '''Bla bla
