@@ -27,13 +27,13 @@ class Visualizer:
         df_x = df.xs(x_axis, level=level_name)
         df_y = df.xs(y_axis, level=level_name)
         index_ids = df_x.index.values
-        index_ids = [chain + '/' + str(id_val) for chain, id_val in index_ids]
+        index_ids_string = ['-'.join(point_name) for point_name in index_ids]
         x_data = df_x.values
         y_data = df_y.values
 
         source = ColumnDataSource(data=dict(
                                   x = x_data, y = y_data,
-                                  desc = index_ids,))
+                                  desc = index_ids_string,))
         hover = HoverTool(tooltips=[('(x,y)','(@x, @y)'),
                                    ('desc','@desc')])
         p = figure(tools=[hover])

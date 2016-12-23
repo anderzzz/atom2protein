@@ -50,4 +50,4 @@ class StatementCreator:
                                    'set_search_resolution' : {'res_min':0.3,
                                    'res_max':1.5}})
         self.summarize_init.append({})
-        self.summarize_stream.append(['set_nresidue', 'set_nresidue_polarity'])
+        self.summarize_stream.append(['set_nresidue', 'set_rresidue_polarity'])

@@ -41,10 +41,10 @@ def main(args):
     data_parser = Parser(PDBData(), 'xml_file')
     path = '/home/anderzzz/ideas/protein/'
     pdb_files = ['protein_3tv3.xml', 'protein_1wm3.xml']
-    collector = []
+    collector = {}
     for pdb_file in pdb_files:
         structure = data_parser(path + pdb_file)
-        print (structure.label)
+        #print (structure.label)
 
         summarizer = StructureSummarizer()
         summarizer.set_nresidues(structure)
@@ -53,8 +53,8 @@ def main(args):
         summarizer.set_bfactor_chain_stat(structure)
         summarizer.set_bb_torsions(structure)
 
-        print (summarizer.unpack_nresidues_polarity())
-        print (summarizer.unpack_rresidues_polarity())
+        #print (summarizer.unpack_nresidues_polarity())
+        #print (summarizer.unpack_rresidues_polarity())
         #print (summarizer.unpack_bfactor_chain_stat())
         #print (summarizer.unpack_bb_torsions())
 #        vis = Visualizer()
@@ -66,10 +66,15 @@ def main(args):
 #                         x_axis='chain', y_axis='residue count',
 #                         stack='property', title='dummy')
 #        vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_polarity.html' %(structure.label))
-        collector.append(summarizer)
+        collector[structure.label] = summarizer
 
+    print ('AAAA')
     ensemble_stat = EnsembleStat()
-    ensemble_stat(collector)
+    xx = ensemble_stat.add_entries(collector, attrib=['bb_torsions'])
+    print (xx)
+    vis = Visualizer()
+    vis.scatter_plot(xx, x_axis='phi', y_axis='psi', level_name='property')
+    vis.make_html('/mnt/c/Users/Anders/Desktop/tmp_add.html')
 
 
 if __name__ == '__main__':

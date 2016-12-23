@@ -149,13 +149,13 @@ class StructureCalculator:
                 c_1 = bb_atoms[step][1][2]
                 n_2 = bb_atoms[step + 1][1][0]
                 omega = self._torsion_angle(ca_0, c_0, n_1, ca_1)
-                key = (label[0], int(bb_atoms[step][0]), 'omega')
+                key = (label[0], bb_atoms[step][0], 'omega')
                 ret[key] = omega
                 phi = self._torsion_angle(c_0, n_1, ca_1, c_1)
-                key = (label[0], int(bb_atoms[step][0]), 'phi')
+                key = (label[0], bb_atoms[step][0], 'phi')
                 ret[key] = phi
                 psi = self._torsion_angle(n_1, ca_1, c_1, n_2)
-                key = (label[0], int(bb_atoms[step][0]), 'psi')
+                key = (label[0], bb_atoms[step][0], 'psi')
                 ret[key] = psi
 
         inds = pd.MultiIndex.from_tuples(ret.keys(),
