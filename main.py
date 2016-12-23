@@ -68,13 +68,13 @@ def main(args):
 #        vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_polarity.html' %(structure.label))
         collector[structure.label] = summarizer
 
-    print ('AAAA')
     ensemble_stat = EnsembleStat()
-    xx = ensemble_stat.add_entries(collector, attrib=['bb_torsions'])
-    print (xx)
+    xx = ensemble_stat.add_entries(collector, attrib=['rresidues_polarity'])
     vis = Visualizer()
-    vis.scatter_plot(xx, x_axis='phi', y_axis='psi', level_name='property')
-    vis.make_html('/mnt/c/Users/Anders/Desktop/tmp_add.html')
+    vis.spider_plot(xx, dims='property', common_range=(0.0, 1.0))
+    vis.make_html('/mnt/c/Users/Anders/Desktop/tmp.html')
+    #vis.scatter_plot(xx, x_axis='phi', y_axis='psi', level_name='property')
+    #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp_add.html')
 
 
 if __name__ == '__main__':
