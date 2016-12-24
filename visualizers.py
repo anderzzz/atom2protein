@@ -49,9 +49,10 @@ class Visualizer:
             raise KeyError('Dimension with name %s not found in data' %(dims))
         else:
             levels = df.index.levels[df.index.names.index(dims)]
+            n_legs = len(levels)
 
         # Compute angles of bars
-        angles = [x * 2.0 * np.pi / len(levels) for x in range(0, len(levels))]
+        angles = [x * 2.0 * np.pi / len(levels) for x in range(0, n_legs)]
 
         # Compute ranges of each bar
         axis_ranges = []
@@ -62,11 +63,12 @@ class Visualizer:
             level_min = df_level.min()
             axis_ranges.append((level_min, level_max))
             level_data.append(df_level)
+        n_webs = len(level_data[0])
 
+        max_of_max = max([axis_range[1] for axis_range in axis_ranges])
+        min_of_min = min([axis_range[0] for axis_range in axis_ranges])
         if same_level_norm:
-            max_of_max = max([axis_range[1] for axis_range in axis_ranges])
-            min_of_min = min([axis_range[0] for axis_range in axis_ranges])
-            axis_ranges = [(min_of_min, max_of_max)] * len(axis_ranges)
+            axis_ranges = [(min_of_min, max_of_max)] * n_legs
 
         if not common_range is None:
             axis_ranges_new = []
@@ -98,16 +100,36 @@ class Visualizer:
         data_to_plot = {}
         for xy in [0, 1]:
             line_data = []
-            for line in range(0, len(level_data[0])):
-                points = list(range(0, len(level_data))) + [0]
+            for line in range(0, n_webs):
+                points = list(range(0, n_legs)) + [0]
                 point_data = []
                 for point in points:
                     point_data.append(point_coords[point][xy][line])
                 line_data.append(point_data)
             data_to_plot[xy] = line_data
 
+        # Create axis line
+        base_line = [0.0, 1.1 * max_of_max]
+        axis_to_plot = {}
+        for angle in angles:
+            x = base_line[0] * np.cos(angle) + base_line[1] * np.sin(angle)
+            y = base_line[0] * np.sin(angle) + base_line[1] * np.cos(angle)
+            coord_x = axis_to_plot.setdefault(0, [])
+            coord_y = axis_to_plot.setdefault(1, [])
+            coord_x.append([0.0, x])
+            coord_y.append([0.0, y])
+            axis_to_plot[0] = coord_x
+            axis_to_plot[1] = coord_y
+
         p = figure()
-        p.multi_line(data_to_plot[0], data_to_plot[1])
+        p.multi_line(data_to_plot[0], data_to_plot[1], alpha=0.6)
+        p.multi_line(axis_to_plot[0], axis_to_plot[1], color='black',
+                     line_width=2.0)
+
+        # Hide grid and axes
+        p.xgrid.grid_line_color = None
+        p.ygrid.grid_line_color = None
+        p.axis.visible = False
 
         self.graph_object = p 
 

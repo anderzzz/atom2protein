@@ -40,7 +40,8 @@ def main(args):
 
     data_parser = Parser(PDBData(), 'xml_file')
     path = '/home/anderzzz/ideas/protein/'
-    pdb_files = ['protein_3tv3.xml', 'protein_1wm3.xml']
+    pdb_files = ['protein_3tv3.xml', 'protein_1wm3.xml',
+    'protein_3a4r.xml','protein_3r0m.xml','protein_3d9a.xml']
     collector = {}
     for pdb_file in pdb_files:
         structure = data_parser(path + pdb_file)
