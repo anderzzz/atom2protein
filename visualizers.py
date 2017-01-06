@@ -1,6 +1,7 @@
 '''Bla bla
 
 '''
+from bokeh.embed import components
 from bokeh.charts import Bar, output_file, show 
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import Range1d, HoverTool
@@ -139,6 +140,16 @@ class Visualizer:
         '''
         output_file(fileout_path)
         show(self.graph_object)
+
+    def make_components(self, fileout_path):
+        '''Bla bla
+
+        '''
+        script, div = components(self.graph_object)
+        with open(fileout_path + '_div', 'w') as fout:
+            fout.write(div)
+        with open(fileout_path + '_script', 'w') as fout:
+            fout.write(script)
 
     def __init__(self, legend='top_right'):
         '''Bla bla

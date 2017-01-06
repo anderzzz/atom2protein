@@ -58,11 +58,12 @@ def main(args):
         #print (summarizer.unpack_rresidues_polarity())
         #print (summarizer.unpack_bfactor_chain_stat())
         #print (summarizer.unpack_bb_torsions())
-#        vis = Visualizer()
-#        vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
-#                         y_axis='psi', level_name='property', x_range=(-180.0, 180.0),
-#                         y_range=(-180.0, 180.0))
-#        vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_rama.html' %(structure.label))
+        vis = Visualizer()
+        vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
+                         y_axis='psi', level_name='property', x_range=(-180.0, 180.0),
+                         y_range=(-180.0, 180.0))
+        #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_rama.html' %(structure.label))
+        vis.make_components('/mnt/c/Users/Anders/Desktop/tmp%s_rama' %(structure.label))
 #        vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
 #                         x_axis='chain', y_axis='residue count',
 #                         stack='property', title='dummy')
@@ -70,10 +71,10 @@ def main(args):
         collector[structure.label] = summarizer
 
     ensemble_stat = EnsembleStat()
-    xx = ensemble_stat.add_entries(collector, attrib=['rresidues_polarity'])
     vis = Visualizer()
-    vis.spider_plot(xx, dims='property', common_range=(0.0, 1.0))
-    vis.make_html('/mnt/c/Users/Anders/Desktop/tmp.html')
+    #xx = ensemble_stat.add_entries(collector, attrib=['rresidues_polarity'])
+    #vis.spider_plot(xx, dims='property', common_range=(0.0, 1.0))
+    #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp.html')
     #vis.scatter_plot(xx, x_axis='phi', y_axis='psi', level_name='property')
     #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp_add.html')
 
