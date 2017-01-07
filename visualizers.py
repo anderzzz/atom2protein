@@ -1,3 +1,7 @@
+'''Contains the methods to generate a visualization from data. Employs the
+Bokeh library to connect Python to Javascript.
+
+'''
 from bokeh.embed import components, file_html
 from bokeh.charts import Bar
 from bokeh.plotting import figure, ColumnDataSource
@@ -140,8 +144,6 @@ class Visualizer:
             axis_ranges.append((level_min, level_max))
             level_data.append(df_level)
         n_webs = len(level_data[0])
-
-        print (n_legs, n_webs)
 
         max_of_max = max([axis_range[1] for axis_range in axis_ranges])
         min_of_min = min([axis_range[0] for axis_range in axis_ranges])
