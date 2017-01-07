@@ -1,19 +1,23 @@
-'''Bla bla
-
-'''
-from bokeh.embed import components
+from bokeh.embed import components, file_html
 from bokeh.charts import Bar, output_file, show 
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import Range1d, HoverTool
+from bokeh.resources import Resources
+
 import pandas as pd
 import numpy as np
 
 class Visualizer:
-    '''Bla bla
+    '''The Visualizer class accepts data of a well-defined format along with
+    data semantics, and generates a Javascript visualization. The
+    initialization defines key attributes and general styling that applies
+    to any type of data visualizations. The methods accept the data and any
+    particular styling specifications. The form of the output depends on which
+    method is called following the visualization method.
 
     '''
     def stacked_bars(self, df, x_axis, y_axis, stack, title=None):
-        '''Bla bla
+        '''Generate stacked bars visualization.
 
         '''
         df_columnwise = df.reset_index()
@@ -23,7 +27,7 @@ class Visualizer:
 
     def scatter_plot(self, df, x_axis, y_axis, level_name, x_range=None, y_range=None,
                      title=None):
-        '''Bla bla
+        '''Generate scatter plot.
 
         '''
         df_x = df.xs(x_axis, level=level_name)
@@ -43,7 +47,7 @@ class Visualizer:
         self.graph_object = p
 
     def spider_plot(self, df, dims, same_level_norm=False, common_range=None):
-        '''Bla bla
+        '''Generate spider plot.
 
         '''
         if not dims in df.index.names:
@@ -134,27 +138,104 @@ class Visualizer:
 
         self.graph_object = p 
 
-    def make_html(self, fileout_path):
-        '''Bla bla
+    def _make_html(self):
+        '''Generate html string object with the javascript data visualization
+        embedded.
+
+        Args: None
+
+        Returns:
+            out_data (tuple): tuple of lists of strings, where the string is
+                              the HTML data, including the embedded Javascript
+                              data visualization, as well as the data semantic
+                              notation '.html'.
 
         '''
-        output_file(fileout_path)
-        show(self.graph_object)
+        html = file_html(self.graph_object, self.bokeh_resource)
+        data = [html]
+        semantics = ['.html']
 
-    def make_components(self, fileout_path):
-        '''Bla bla
+        return (data, semantics)
+
+    def _make_components(self):
+        '''Generate Javascript string object of the data visualization, along
+        with a HTML snippet required to render to Javascript if embedded in a
+        HTML file.
+
+        Args: None
+
+        Returns:
+            out_data (tuple): tuple of lists of strings, where the string is
+                              the Javascript code of the data visualization, as
+                              well as the HTML snippet. The second element of
+                              tuple contains data semantic notations '.js' and
+                              '.html_div'.
 
         '''
         script, div = components(self.graph_object)
-        with open(fileout_path + '_div', 'w') as fout:
-            fout.write(div)
-        with open(fileout_path + '_script', 'w') as fout:
-            fout.write(script)
+        data = [script, div]
+        semantics = ['.js', '.html_div']
 
-    def __init__(self, legend='top_right'):
+        return (data, semantics)
+
+    def get_output(self):
+        '''Method to return output data for the visualization. The type of
+        output data is set during initialization.
+
+        Args:
+            None
+
+        Returns:
+            out_data (tuple): tuple of lists of strings, where each string is
+                              the specified type of data, and the two elements
+                              of the tuple are the actual data and a simple
+                              descriptor of the type of string data.
+
+        Raises:
+            AttributeError: In case either the method is called prior to a
+                            method for Javascript generation, or an invalid
+                            output format is requested.
+
+        '''
+        if self.graph_object is None:
+            raise AttributeError('There is no visualization data to output')
+
+        if self.output_format == 'html':
+            ret = self._make_html()
+        elif self.output_format == 'javascript':
+            ret = self._make_components()
+        else:
+            raise AttributeError('No valid output format defined')
+
+        return ret
+
+    def write_output(self, path_dir, namespace):
+        '''Write output files to set directory and namespace
+
+        Args:
+            path_dir (string): Path to directory into which to place files.
+            namespace (string): Root string of name of files. 
+
+        Returns: None
+
+        '''
+        if path_dir[-1] == '/':
+            path = path_dir + namespace
+        else:
+            path = path_dir + '/' + namespace
+
+        data, semantics = self.get_output()
+        for point, semantic in zip(data, semantics):
+            with open(path + semantic, 'w') as fout:
+                fout.write(point)
+
+    def __init__(self, legend='top_right', write_output_format='javascript'):
         '''Bla bla
 
         '''
-        self.legend = legend
-
         self.graph_object = None
+
+        self.output_format = write_output_format
+        self.legend = legend
+        self.bokeh_resource = Resources(mode='cdn')
+

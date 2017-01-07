@@ -58,12 +58,12 @@ def main(args):
         #print (summarizer.unpack_rresidues_polarity())
         #print (summarizer.unpack_bfactor_chain_stat())
         #print (summarizer.unpack_bb_torsions())
-        vis = Visualizer()
+        vis = Visualizer(write_output_format='html')
         vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
                          y_axis='psi', level_name='property', x_range=(-180.0, 180.0),
                          y_range=(-180.0, 180.0))
         #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_rama.html' %(structure.label))
-        vis.make_components('/mnt/c/Users/Anders/Desktop/tmp%s_rama' %(structure.label))
+        vis.write_output('/mnt/c/Users/Anders/Desktop', 'pdb_%s' %(structure.label))
 #        vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
 #                         x_axis='chain', y_axis='residue count',
 #                         stack='property', title='dummy')
