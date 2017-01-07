@@ -60,12 +60,13 @@ def main(args):
         #print (summarizer.unpack_bb_torsions())
         vis = Visualizer(write_output_format='html',
                          background_color='#ffccaa')
-        #vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
-        #                 y_axis='psi', level_name='property', x_range=(-180.0, 180.0),
-        #                 y_range=(-180.0, 180.0))
-        vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
-                         x_axis='chain', y_axis='residue count',
-                         stack='property', title='dummy')
+        vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
+                         y_axis='psi', level_name='property', 
+                         y_range=(-180.0, 180.0), x_range=(-180.0, 180.0),
+                         alpha=0.2)
+        #vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
+        #                 x_axis='chain', y_axis='residue count',
+        #                 stack='property', title='dummy')
         vis.write_output('/mnt/c/Users/Anders/Desktop', 'pdb_%s' %(structure.label))
         collector[structure.label] = summarizer
 

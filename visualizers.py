@@ -32,7 +32,9 @@ class Visualizer:
             stack (string): Name of the index type to define the categories of
                             data to stack. Each unique index of that index type
                             becomes a segment of each bar.
-            title (string, optional): Title to add at tope of data visualization.
+            title (string, optional): Title to add at top of data visualization.
+
+        Returns: None
 
         '''
         # Re-shape data as required by Bokeh
@@ -42,11 +44,36 @@ class Visualizer:
         # Create a stacked bar
         p = Bar(df_columnwise, label=x_axis, stack=stack, values=y_axis,
                 title=title, legend=self.legend, **self.plot_defaults)
+
         self.graph_object = p
 
     def scatter_plot(self, df, x_axis, y_axis, level_name, x_range=None, y_range=None,
-                     title=None):
+                     title=None, size=10.0, color='#0000ff', alpha=1.0):
         '''Generate scatter plot.
+
+        Args:
+            df (pandas Series): Data to plot. This should be shaped as a
+                                MultiIndex Pandas Series, where each level of
+                                index is named, and there is one column of
+                                data, also with a name.
+            x_axis (string): Name of index of type defined by level_name to be
+                             used to define horizontal coordinates.
+            y_axis (string): Name of index of type defined by level_name to be
+                             used to define vertical coordinates.
+            level_name (string): Name of index type from which to collect the
+                                 horizontal and vertical coordinate data.
+            x_range (tuple, optional): Two integers to define lower and upper
+                                       bound of horizontal axis; if None the
+                                       min and max of data is used.
+            y_range (tuple, optional): Two integers to define lower and upper
+                                       bound of vertical axis; if None the
+                                       min and max of data is used.
+            title (string, optional): Title to add at top of data visualization.
+            size (float, optional): Size of marker.
+            color (string, optional): Color of marker.
+            alpha (float, optional): Transparency of marker.
+
+        Returns: None
 
         '''
         df_x = df.xs(x_axis, level=level_name)
@@ -56,26 +83,51 @@ class Visualizer:
         x_data = df_x.values
         y_data = df_y.values
 
+        # In order to enable Hover Tool, the data is given a descriptor
         source = ColumnDataSource(data=dict(
                                   x = x_data, y = y_data,
                                   desc = index_ids_string,))
         hover = HoverTool(tooltips=[('(x,y)','(@x, @y)'),
                                    ('desc','@desc')])
+
         p = figure(tools=[hover], **self.plot_defaults)
-        p.circle('x', 'y', size=10, source=source)
+        p.circle('x', 'y', size=size, source=source, color=color,
+                 alpha=alpha)
+        
+        # Force certain range on horizontal and vertical axes.
+        if not x_range is None:
+            p.x_range = Range1d(*x_range) 
+        if not y_range is None:
+            p.y_range = Range1d(*y_range) 
+
         self.graph_object = p
 
-    def spider_plot(self, df, dims, same_level_norm=False, common_range=None):
+    def spider_plot(self, df, dims, same_level_norm=False, common_range=None,
+                    alpha=0.6):
         '''Generate spider plot.
 
+        Args:
+            df (pandas Series): Data to plot. This should be shaped as a
+                                MultiIndex Pandas Series, where each
+                                level of index is named, and there is one 
+                                column of data, also with a name.
+            dims (string): Name of index type that defines dimensions of data.
+            save_level_norm (bool, optional): If True, make each leg in plot
+                                   bounded by the same (global) maximum and minimum.
+            common_range (tuple, optional): A tuple of the minimum and maximum
+                                   to bound all legs in plot by; must include
+                                   all data. 
+            alpha (float, optional): Transparency of web lines.
+
+        Returns: None
+
         '''
+        # Determine number of dimensions, and hence leg distribution 
         if not dims in df.index.names:
             raise KeyError('Dimension with name %s not found in data' %(dims))
         else:
             levels = df.index.levels[df.index.names.index(dims)]
             n_legs = len(levels)
-
-        # Compute angles of bars
         angles = [x * 2.0 * np.pi / len(levels) for x in range(0, n_legs)]
 
         # Compute ranges of each bar
@@ -88,6 +140,8 @@ class Visualizer:
             axis_ranges.append((level_min, level_max))
             level_data.append(df_level)
         n_webs = len(level_data[0])
+
+        print (n_legs, n_webs)
 
         max_of_max = max([axis_range[1] for axis_range in axis_ranges])
         min_of_min = min([axis_range[0] for axis_range in axis_ranges])
@@ -146,7 +200,8 @@ class Visualizer:
             axis_to_plot[1] = coord_y
 
         p = figure(**self.plot_defaults)
-        p.multi_line(data_to_plot[0], data_to_plot[1], alpha=0.6)
+        # TODO: Make color a property by cluster list as set from input
+        p.multi_line(data_to_plot[0], data_to_plot[1], alpha=alpha)
         p.multi_line(axis_to_plot[0], axis_to_plot[1], color='black',
                      line_width=2.0)
 
