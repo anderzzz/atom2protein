@@ -119,12 +119,6 @@ class StructureSummarizer:
         '''
         return self.rresidues_polarity
 
-    def set_label(self, label):
-        '''Bla bla
-
-        '''
-        self.label = label
-
     def get_label(self):
         '''Bla bla
 
@@ -141,13 +135,13 @@ class StructureSummarizer:
 
         return wrapper
 
-    def __init__(self, **kwargs):
+    def __init__(self, label, **kwargs):
         '''Bla bla
 
         '''
         self.calculator = StructureCalculator(**kwargs)
 
-        self.label = None
+        self.label = label 
         self.nresidues = None
         self.nresidues_polarity = None
         self.rresidues_polarity = None

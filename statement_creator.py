@@ -4,6 +4,7 @@
 from rootdata import PDBData
 from parsers import Parser
 from summaries import Summarizer
+from ensemble_stat import EnsembleStat
 
 from collections import namedtuple
 
