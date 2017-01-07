@@ -1,5 +1,5 @@
 from bokeh.embed import components, file_html
-from bokeh.charts import Bar, output_file, show 
+from bokeh.charts import Bar
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import Range1d, HoverTool
 from bokeh.resources import Resources
@@ -19,10 +19,29 @@ class Visualizer:
     def stacked_bars(self, df, x_axis, y_axis, stack, title=None):
         '''Generate stacked bars visualization.
 
+        Args:
+            df (pandas Series): Data to plot. This should be shaped as a
+                                MultiIndex Pandas Series, where each
+                                level of index is named, and there is one 
+                                column of data, also with a name.
+            x_axis (string): Name of index type to define the bars on the
+                             horizontal axis. Each unique index of that index
+                             type becomes a bar.
+            y_axis (string): What values to define stack size of bars. This
+                             should always equal the name of the single column.
+            stack (string): Name of the index type to define the categories of
+                            data to stack. Each unique index of that index type
+                            becomes a segment of each bar.
+            title (string, optional): Title to add at tope of data visualization.
+
         '''
+        # Re-shape data as required by Bokeh
         df_columnwise = df.reset_index()
         df_columnwise[y_axis] = df_columnwise[y_axis].astype(float)
-        p = Bar(df_columnwise, label=x_axis, stack=stack, values=y_axis, title=title)
+
+        # Create a stacked bar
+        p = Bar(df_columnwise, label=x_axis, stack=stack, values=y_axis,
+                title=title, legend=self.legend, **self.plot_defaults)
         self.graph_object = p
 
     def scatter_plot(self, df, x_axis, y_axis, level_name, x_range=None, y_range=None,
@@ -42,7 +61,7 @@ class Visualizer:
                                   desc = index_ids_string,))
         hover = HoverTool(tooltips=[('(x,y)','(@x, @y)'),
                                    ('desc','@desc')])
-        p = figure(tools=[hover])
+        p = figure(tools=[hover], **self.plot_defaults)
         p.circle('x', 'y', size=10, source=source)
         self.graph_object = p
 
@@ -126,7 +145,7 @@ class Visualizer:
             axis_to_plot[0] = coord_x
             axis_to_plot[1] = coord_y
 
-        p = figure()
+        p = figure(**self.plot_defaults)
         p.multi_line(data_to_plot[0], data_to_plot[1], alpha=0.6)
         p.multi_line(axis_to_plot[0], axis_to_plot[1], color='black',
                      line_width=2.0)
@@ -229,7 +248,8 @@ class Visualizer:
             with open(path + semantic, 'w') as fout:
                 fout.write(point)
 
-    def __init__(self, legend='top_right', write_output_format='javascript'):
+    def __init__(self, legend='top_right', write_output_format='javascript',
+                 background_color='#ffffff'):
         '''Bla bla
 
         '''
@@ -238,4 +258,5 @@ class Visualizer:
         self.output_format = write_output_format
         self.legend = legend
         self.bokeh_resource = Resources(mode='cdn')
+        self.plot_defaults = {'background_fill_color':background_color}
 

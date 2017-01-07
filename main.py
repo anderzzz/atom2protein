@@ -58,25 +58,22 @@ def main(args):
         #print (summarizer.unpack_rresidues_polarity())
         #print (summarizer.unpack_bfactor_chain_stat())
         #print (summarizer.unpack_bb_torsions())
-        vis = Visualizer(write_output_format='html')
-        vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
-                         y_axis='psi', level_name='property', x_range=(-180.0, 180.0),
-                         y_range=(-180.0, 180.0))
-        #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_rama.html' %(structure.label))
+        vis = Visualizer(write_output_format='html',
+                         background_color='#ffccaa')
+        #vis.scatter_plot(summarizer.unpack_bb_torsions(), x_axis='phi',
+        #                 y_axis='psi', level_name='property', x_range=(-180.0, 180.0),
+        #                 y_range=(-180.0, 180.0))
+        vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
+                         x_axis='chain', y_axis='residue count',
+                         stack='property', title='dummy')
         vis.write_output('/mnt/c/Users/Anders/Desktop', 'pdb_%s' %(structure.label))
-#        vis.stacked_bars(summarizer.get_nresidues_polarity().unpack_value(),
-#                         x_axis='chain', y_axis='residue count',
-#                         stack='property', title='dummy')
-#        vis.make_html('/mnt/c/Users/Anders/Desktop/tmp%s_polarity.html' %(structure.label))
         collector[structure.label] = summarizer
 
     ensemble_stat = EnsembleStat()
-    vis = Visualizer()
-    #xx = ensemble_stat.add_entries(collector, attrib=['rresidues_polarity'])
-    #vis.spider_plot(xx, dims='property', common_range=(0.0, 1.0))
-    #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp.html')
-    #vis.scatter_plot(xx, x_axis='phi', y_axis='psi', level_name='property')
-    #vis.make_html('/mnt/c/Users/Anders/Desktop/tmp_add.html')
+    vis = Visualizer(write_output_format='html', background_color='#ffccaa')
+    xx = ensemble_stat.add_entries(collector, attrib=['rresidues_polarity'])
+    vis.spider_plot(xx, dims='property', common_range=(0.0, 1.0))
+    vis.write_output('/mnt/c/Users/Anders/Desktop', 'spider_test')
 
 
 if __name__ == '__main__':
