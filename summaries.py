@@ -5,6 +5,7 @@ from primitivedata import Structure, PubMedEntry
 from calculators import StructureCalculator
 
 import json
+import pandas as pd
 from collections import namedtuple
 
 class UnknownDataType(Exception):
@@ -58,7 +59,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.calculator.cmp_bb_torsions(structure)
+        value = self._add_id_to(self.calculator.cmp_bb_torsions(structure))
         self.bb_torsions = Entry('backbone torsions', value, None)
 
     def get_bb_torsions(self):
@@ -71,7 +72,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.calculator.cmp_bfactor_chain_stat(structure)
+        value = self._add_id_to(self.calculator.cmp_bfactor_chain_stat(structure))
         self.bfactor_chain_stat = Entry('B-factor chain statistics', value, None)
 
     def get_bfactor_chain_stat(self):
@@ -84,7 +85,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.calculator.cmp_nresidues(structure)
+        value = self._add_id_to(self.calculator.cmp_nresidues(structure))
         self.nresidues = Entry('number of residues', value, None)
 
     def get_nresidues(self):
@@ -97,7 +98,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.calculator.cmp_nresidues_polarity(structure)
+        value = self._add_id_to(self.calculator.cmp_nresidues_polarity(structure))
         self.nresidues_polarity = Entry('number of polarity residues', value, None)
 
     def get_nresidues_polarity(self):
@@ -110,7 +111,7 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        value = self.calculator.cmp_rresidues_polarity(structure)
+        value = self._add_id_to(self.calculator.cmp_rresidues_polarity(structure))
         self.rresidues_polarity = Entry('percentage of polarity residues', value, None)
 
     def get_rresidues_polarity(self):
@@ -134,6 +135,22 @@ class StructureSummarizer:
             return output.unpack_value()
 
         return wrapper
+
+    def _add_id_to(self, df):
+        '''Bla bla
+
+        '''
+        names = ['id'] + df.index.names
+        extended_index = [(self.label, ) + ind for ind in df.index]
+        df.index = pd.MultiIndex.from_tuples(extended_index, names=names)
+
+        return df
+
+    def __add__(self, other):
+        '''Bla bla
+
+        '''
+        raise TypeError 
 
     def __init__(self, label, **kwargs):
         '''Bla bla
