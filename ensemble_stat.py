@@ -4,6 +4,10 @@
 from visualizers import Visualizer
 from summaries import Entry
 
+from pathlib import Path
+import datetime
+import sqlite3
+import random, string
 import inspect
 import pandas as pd 
 
@@ -57,6 +61,13 @@ class EnsembleStat:
             if isinstance(whatwegot, Entry):
                 yield whatwegot
 
+    def _randomword(self, length):
+        '''Bla bla
+
+        '''
+        return ''.join(random.choice(string.ascii_lowercase +
+                                     string.digits) for i in range(length))
+
     def add_entries(self, sum_iterator, attrib=None):
         '''Bla bla
 
@@ -85,7 +96,34 @@ class EnsembleStat:
 
         return c
 
-    def visualize_individual(self, label_set=None):
+    def _setup_db(self, out_file_path='vizfiles.db'):
+        '''Bla bla
+
+        '''
+        conn = sqlite3.connect(out_file_path)
+        c = conn.cursor()
+
+        try:
+            c.execute("CREATE TABLE ensemble_files " + \
+                      "(source_label, summary_label, ensemble_method, " + \
+                      "file_path, file_namespace, created_time)") 
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass
+
+        return conn
+
+    def _insert_db(self, primary, secondary, tertiary, path, ns, time):
+        '''Bla bla
+
+        '''
+        c = self.db_conn.cursor()
+        out_tuple = (primary, secondary, tertiary, path, ns, time)
+        c.execute("INSERT INTO ensemble_files VALUES " + \
+                  "('%s','%s','%s','%s','%s','%s')" %out_tuple)
+        self.db_conn.commit()
+
+    def visualize_individual(self, label_set=None, type_set=None):
         '''Bla bla
 
         '''
@@ -95,22 +133,35 @@ class EnsembleStat:
             collector = self._get_summary_subset(label_set)
 
         for summary in collector:
-            for xx in summary.get_entries():
-                viz = Visualizer(write_output_format='html')
-                print (self.viz_rundata)
-                for viz_method, viz_kwargs in self.viz_rundata[xx.key]:
-                    getattr(viz, viz_method)(xx.value, **viz_kwargs)
-                    print (viz.get_output())
-                raise TypeError('dummy')
-            
+            for entry in summary.get_entries():
 
+                if not type_set is None:
+                    if not entry.key in type_set:
+                        continue
 
-    def __init__(self, iterof_summaries):
+                viz = Visualizer()
+                for viz_method, viz_kwargs in self.viz_rundata[entry.key]:
+                    namespace = self._randomword(15)
+                    now = datetime.datetime.now().ctime()
+                    getattr(viz, viz_method)(entry.value, **viz_kwargs)
+                    viz.write_output(self.path_viz_out, namespace)
+                    self._insert_db(summary.label, entry.key, viz_method, 
+                                    self.path_viz_out, namespace, now)
+
+    def close_db(self):
+        '''Bla bla
+        
+        '''
+        self.db_conn.close()
+
+    def __init__(self, iterof_summaries, path_out=None):
         '''Bla bla
 
         '''
         self.summaries = iterof_summaries
+        self.path_viz_out = path_out
 
+        self.db_conn = self._setup_db()
         self.viz_rundata = HowToViz()
         self.viz_rundata.add_howto('Backbone torsions', 'scatter_plot',
                         {'x_axis' : 'phi', 'y_axis' : 'psi', 
