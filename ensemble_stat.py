@@ -123,7 +123,7 @@ class EnsembleStat:
                   "('%s','%s','%s','%s','%s','%s')" %out_tuple)
         self.db_conn.commit()
 
-    def visualize_individual(self, label_set=None, type_set=None):
+    def _get_label_iter(self, label_set):
         '''Bla bla
 
         '''
@@ -132,14 +132,16 @@ class EnsembleStat:
         else:
             collector = self._get_summary_subset(label_set)
 
-        for summary in collector:
-            for entry in summary.get_entries():
+        return iter(collector)
 
-                if not type_set is None:
-                    if not entry.key in type_set:
-                        continue
+    def visualize_individual(self, entry_functions, label_set=None):
+        '''Bla bla
 
-                viz = Visualizer()
+        '''
+        for summary in self._get_label_iter(label_set): 
+            for retrieval_method in entry_functions:
+                entry = getattr(summary, retrieval_method)()
+                viz = Visualizer(write_output_format='html')
                 for viz_method, viz_kwargs in self.viz_rundata[entry.key]:
                     namespace = self._randomword(15)
                     now = datetime.datetime.now().ctime()
@@ -147,6 +149,19 @@ class EnsembleStat:
                     viz.write_output(self.path_viz_out, namespace)
                     self._insert_db(summary.label, entry.key, viz_method, 
                                     self.path_viz_out, namespace, now)
+
+    def visualize_union(self, union_func, entry_functions, label_set=None):
+        '''Bla bla
+
+        '''
+        print (self.summaries)
+        print (dir(self.summaries[0]))
+        raise TypeError
+        for summary in self._get_label_iter(label_set):
+            for retrieval_method in entry_functions:
+                entry = getattr(summary, retrieval_method)()
+
+            
 
     def close_db(self):
         '''Bla bla
@@ -161,11 +176,17 @@ class EnsembleStat:
         self.summaries = iterof_summaries
         self.path_viz_out = path_out
 
-        self.db_conn = self._setup_db()
+        self.db_conn = self._setup_db(path_out + '/viz.db')
         self.viz_rundata = HowToViz()
-        self.viz_rundata.add_howto('Backbone torsions', 'scatter_plot',
+        self.viz_rundata.add_howto('backbone torsions', 'scatter_plot',
                         {'x_axis' : 'phi', 'y_axis' : 'psi', 
                          'level_name': 'property', 
                          'y_range' : (-180.0, 180.0), 
                          'x_range' : (-180.0, 180.0), 'alpha' : 0.5})
+        self.viz_rundata.add_howto('number of residues', 'stacked_bars',
+                        {'x_axis' : 'chain', 'y_axis' : 'residue count', 
+                         'stack': 'property'}) 
+        self.viz_rundata.add_howto('number of polarity residues', 'stacked_bars',
+                        {'x_axis' : 'chain', 'y_axis' : 'residue count', 
+                         'stack': 'property'}) 
 

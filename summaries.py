@@ -59,7 +59,7 @@ class StructureSummarizer:
 
         '''
         value = self.calculator.cmp_bb_torsions(structure)
-        self.bb_torsions = Entry('Backbone torsions', value, None)
+        self.bb_torsions = Entry('backbone torsions', value, None)
 
     def get_bb_torsions(self):
         '''Bla bla

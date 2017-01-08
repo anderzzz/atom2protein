@@ -58,7 +58,12 @@ def main(args):
 
     ensemble_stat = EnsembleStat(collector, path_viz_out)
     ensemble_stat.visualize_individual(label_set=['3tv3','1wm3'],
-                                       type_set=['Backbone torsions'])
+                                       entry_functions=['get_bb_torsions',
+                                                 'get_nresidues',
+                                                 'get_nresidues_polarity'])
+    ensemble_stat.visualize_union('join',
+                                  label_set=['3tv3','1wm3'],
+                                  entry_functions=['get_nresidues_polarity'])
     ensemble_stat.close_db()
 
 
