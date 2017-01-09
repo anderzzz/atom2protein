@@ -99,9 +99,9 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        new_summary = self.__init__(self.label + '+' + other.label)
+        new_summary = StructureSummarizer(self.label + '+' + other.label)
         a_entries = set(self.__iter__())
-        b_entries = set(self.__iter__())
+        b_entries = set(other.__iter__())
         all_entry_types = a_entries | b_entries
         for entry_type in all_entry_types:
             if (entry_type in a_entries) and (entry_type in b_entries):

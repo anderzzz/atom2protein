@@ -63,7 +63,7 @@ def main(args):
                                                     'nresidues_polarity'])
     ensemble_stat.visualize_union('join',
                                   label_set=['3tv3','1wm3','3d9a'],
-                                  entry_functions=['nresidues_polarity'])
+                                  entry_types=['nresidues_polarity'])
     ensemble_stat.close_db()
 
 
