@@ -11,7 +11,7 @@ import random, string
 import inspect
 import pandas as pd 
 
-class EnsembleStat:
+class EnsembleMaker:
     '''Bla bla
 
     '''
