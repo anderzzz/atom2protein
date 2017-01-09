@@ -48,22 +48,22 @@ def main(args):
         print (structure.label)
 
         summarizer = StructureSummarizer(structure.label)
-        summarizer.set_nresidues(structure)
-        summarizer.set_nresidues_polarity(structure)
-        summarizer.set_rresidues_polarity(structure)
-        summarizer.set_bfactor_chain_stat(structure)
-        summarizer.set_bb_torsions(structure)
+        summarizer.populate_nresidues(structure)
+        summarizer.populate_nresidues_polarity(structure)
+        summarizer.populate_rresidues_polarity(structure)
+        summarizer.populate_bfactor_chain_stat(structure)
+        summarizer.populate_bb_torsions(structure)
 
         collector.append(summarizer)
 
     ensemble_stat = EnsembleStat(collector, path_viz_out)
     ensemble_stat.visualize_individual(label_set=['3tv3','1wm3'],
-                                       entry_functions=['get_bb_torsions',
-                                                 'get_nresidues',
-                                                 'get_nresidues_polarity'])
+                                       entry_types=['bb_torsions',
+                                                    'nresidues',
+                                                    'nresidues_polarity'])
     ensemble_stat.visualize_union('join',
-                                  label_set=['3tv3','1wm3'],
-                                  entry_functions=['get_nresidues_polarity'])
+                                  label_set=['3tv3','1wm3','3d9a'],
+                                  entry_functions=['nresidues_polarity'])
     ensemble_stat.close_db()
 
 

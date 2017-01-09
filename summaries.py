@@ -6,7 +6,7 @@ from calculators import StructureCalculator
 
 import json
 import pandas as pd
-from collections import namedtuple
+from inspect import getmembers
 
 class UnknownDataType(Exception):
     pass
@@ -15,19 +15,13 @@ class Entry:
     '''Bla bla
 
     '''
-    def unpack_value(self):
+    def __init__(self, brief, value, verbose=None):
         '''Bla bla
 
         '''
-        return self.value
-
-    def __init__(self, key, value, description=None):
-        '''Bla bla
-
-        '''
-        self.key = key
+        self.brief = brief
         self.value = value
-        self.description = description
+        self.verbose = verbose
 
 class StructureSummarizer:
     '''Bla bla
@@ -45,96 +39,51 @@ class StructureSummarizer:
         '''
         pass
 
-    def get_entries(self):
-        '''Bla bla
-
-        '''
-        public_attributes = [x for x in dir(self) if x[0] != '_']
-        for attribute in public_attributes:
-            whatweget = getattr(self, attribute)
-            if isinstance(whatweget, Entry):
-                yield whatweget
-
-    def set_bb_torsions(self, structure):
+    def populate_bb_torsions(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_bb_torsions(structure))
-        self.bb_torsions = Entry('backbone torsions', value, None)
+        self['bb_torsions'] = Entry('backbone torsion angles', value, None)
 
-    def get_bb_torsions(self):
-        '''Bla bla
-
-        '''
-        return self.bb_torsions
-
-    def set_bfactor_chain_stat(self, structure):
+    def populate_bfactor_chain_stat(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_bfactor_chain_stat(structure))
-        self.bfactor_chain_stat = Entry('B-factor chain statistics', value, None)
+        self['bfactor_chain_stat'] = Entry('B-factor chain statistics', value, None)
 
-    def get_bfactor_chain_stat(self):
-        '''Bla bla
-
-        '''
-        return self.bfactor_chain_stat
-
-    def set_nresidues(self, structure):
+    def populate_nresidues(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_nresidues(structure))
-        self.nresidues = Entry('number of residues', value, None)
+        self['nresidues'] = Entry('number of residues', value, None)
 
-    def get_nresidues(self):
-        '''Bla bla
-
-        '''
-        return self.nresidues
-
-    def set_nresidues_polarity(self, structure):
+    def populate_nresidues_polarity(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_nresidues_polarity(structure))
-        self.nresidues_polarity = Entry('number of polarity residues', value, None)
+        self['nresidues_polarity'] = Entry('number of polarity residues', value, None)
 
-    def get_nresidues_polarity(self):
-        '''Bla bla
-
-        '''
-        return self.nresidues_polarity
-
-    def set_rresidues_polarity(self, structure):
+    def populate_rresidues_polarity(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_rresidues_polarity(structure))
-        self.rresidues_polarity = Entry('percentage of polarity residues', value, None)
+        self['rresidues_polarity'] = Entry('percentage of polarity residues', value, None)
 
-    def get_rresidues_polarity(self):
+    def _get_live_entries(self):
         '''Bla bla
 
         '''
-        return self.rresidues_polarity
-
-    def get_label(self):
-        '''Bla bla
-
-        '''
-        return self.label
-
-    def _unpack(self, get_function):
-        '''Bla bla
-
-        '''
-        def wrapper():
-            output = get_function()
-            return output.unpack_value()
-
-        return wrapper
+        live_entries = []
+        for member, value in self.entry_collector.items():
+            if isinstance(value, Entry):
+                live_entries.append(member)
+        
+        return live_entries
 
     def _add_id_to(self, df):
         '''Bla bla
@@ -150,26 +99,74 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        raise TypeError 
+        new_summary = self.__init__(self.label + '+' + other.label)
+        a_entries = set(self.__iter__())
+        b_entries = set(self.__iter__())
+        all_entry_types = a_entries | b_entries
+        for entry_type in all_entry_types:
+            if (entry_type in a_entries) and (entry_type in b_entries):
+                a_entry = self[entry_type]
+                b_entry = other[entry_type]
+                value = a_entry.value.append(b_entry.value)
+                entry_brief = a_entry.brief 
+                entry_verbose = a_entry.verbose 
+            elif entry_type in a_entries:
+                a_entry = self[entry_type]
+                value = a_entry.value
+                entry_brief = a_entry.brief 
+                entry_verbose = a_entry.verbose 
+            elif entry_type in b_entries:
+                b_entry = other[entry_type]
+                value = b_entry.value
+                entry_brief = b_entry.brief 
+                entry_verbose = b_entry.verbose 
 
-    def __init__(self, label, **kwargs):
+            new_entry = Entry(entry_brief, value, entry_verbose)
+            new_summary[entry_type] = new_entry
+            
+        return new_summary
+
+    def __getitem__(self, key):
+        '''Bla bla
+
+        '''
+        try:
+            ret = self.entry_collector[key] 
+        except KeyError:
+            raise KeyError('An entry for  %s not found in Summary' %(key))
+
+        if ret is None:
+            raise KeyError('A live entry of name %s not found in Summary' %(key))
+
+        return ret
+
+    def __setitem__(self, key, value):
+        '''Bla bla
+
+        '''
+        self.entry_collector[key] = value 
+
+    def __iter__(self):
+        '''Bla bla
+
+        '''
+        return iter(self._get_live_entries())
+
+    def __init__(self, label, nresidues=None, nresidues_polarity=None,
+                 rresidues_polarity=None, bfactor_chain_stat=None,
+                 bb_torsions=None, **kwargs):
         '''Bla bla
 
         '''
         self.calculator = StructureCalculator(**kwargs)
 
         self.label = label 
-        self.nresidues = None
-        self.nresidues_polarity = None
-        self.rresidues_polarity = None
-        self.bfactor_chain_stat = None
+        self.entry_collector = {'nresidues' : nresidues,
+                                'nresidues_polarity' : nresidues_polarity,
+                                'rresidues_polarity' : rresidues_polarity,
+                                'bfactor_chain_stat' : bfactor_chain_stat,
+                                'bb_torsions' : bb_torsions}
 
-        self.unpack_nresidues_polarity = self._unpack(self.get_nresidues_polarity)
-        self.unpack_rresidues_polarity = self._unpack(self.get_rresidues_polarity)
-        self.unpack_nresidues = self._unpack(self.get_nresidues)
-        self.unpack_bfactor_chain_stat = self._unpack(self.get_bfactor_chain_stat)
-        self.unpack_bb_torsions = self._unpack(self.get_bb_torsions)
-        
 class PubMedSummarizer:
     '''Bla bla
 

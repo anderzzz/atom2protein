@@ -89,7 +89,7 @@ class EnsembleStat:
         '''
         c = []
         for s in self.summaries:
-            if s.get_label() in label_set:
+            if s.label in label_set:
                 c.append(s)
         if len(c) == 0:
             raise KeyError('No data summaries with requested labels exist')
@@ -134,33 +134,52 @@ class EnsembleStat:
 
         return iter(collector)
 
-    def visualize_individual(self, entry_functions, label_set=None):
+    def join(self, data_methods, label_set):
+        '''Bla bla
+
+        '''
+        xx = list(self._get_label_iter(label_set))
+        print (xx)
+        print (xx[0] + xx[1] + xx[2])
+        s = xx[0]
+        for x in xx[1:]:
+            s += x
+        print (s)
+        print (s.key)
+        raise TypeError
+        for summary in self._get_label_iter(label_set):
+            for retrieval_method in data_methods:
+                entry = getattr(summary, retrieval_method)()
+                print (summary.label)
+                print (entry)
+        raise TypeError
+
+    def visualize_individual(self, entry_types, label_set=None):
         '''Bla bla
 
         '''
         for summary in self._get_label_iter(label_set): 
-            for retrieval_method in entry_functions:
-                entry = getattr(summary, retrieval_method)()
+            for entry_type in entry_types:
+                entry = summary[entry_type]
                 viz = Visualizer(write_output_format='html')
-                for viz_method, viz_kwargs in self.viz_rundata[entry.key]:
+                for viz_method, viz_kwargs in self.viz_rundata[entry_type]:
                     namespace = self._randomword(15)
                     now = datetime.datetime.now().ctime()
                     getattr(viz, viz_method)(entry.value, **viz_kwargs)
                     viz.write_output(self.path_viz_out, namespace)
-                    self._insert_db(summary.label, entry.key, viz_method, 
+                    self._insert_db(summary.label, entry.brief, viz_method, 
                                     self.path_viz_out, namespace, now)
 
     def visualize_union(self, union_func, entry_functions, label_set=None):
         '''Bla bla
 
         '''
-        print (self.summaries)
-        print (dir(self.summaries[0]))
-        raise TypeError
-        for summary in self._get_label_iter(label_set):
-            for retrieval_method in entry_functions:
-                entry = getattr(summary, retrieval_method)()
-
+        data_union = getattr(self, union_func)(entry_functions, label_set)
+        for retrieval_method in entry_functions:
+            entry = getattr(summary, retrieval_method)()
+            viz = Visualizer(write_output_format='html')
+            for viz_method, viz_kwargs in self.viz_rundata['union ' + entry.key]:
+                pass
             
 
     def close_db(self):
@@ -178,15 +197,15 @@ class EnsembleStat:
 
         self.db_conn = self._setup_db(path_out + '/viz.db')
         self.viz_rundata = HowToViz()
-        self.viz_rundata.add_howto('backbone torsions', 'scatter_plot',
+        self.viz_rundata.add_howto('bb_torsions', 'scatter_plot',
                         {'x_axis' : 'phi', 'y_axis' : 'psi', 
                          'level_name': 'property', 
                          'y_range' : (-180.0, 180.0), 
                          'x_range' : (-180.0, 180.0), 'alpha' : 0.5})
-        self.viz_rundata.add_howto('number of residues', 'stacked_bars',
+        self.viz_rundata.add_howto('nresidues', 'stacked_bars',
                         {'x_axis' : 'chain', 'y_axis' : 'residue count', 
                          'stack': 'property'}) 
-        self.viz_rundata.add_howto('number of polarity residues', 'stacked_bars',
+        self.viz_rundata.add_howto('nresidues_polarity', 'stacked_bars',
                         {'x_axis' : 'chain', 'y_axis' : 'residue count', 
                          'stack': 'property'}) 
 
