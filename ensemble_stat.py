@@ -11,38 +11,6 @@ import random, string
 import inspect
 import pandas as pd 
 
-class HowToViz:
-    '''Bla bla
-
-    '''
-    def add_howto(self, data_entry, method_name, kwargs_dict):
-        '''Bla bla
-
-        '''
-        if not method_name in self.available_viz_methods:
-            raise KeyError('The Visualizer class does not contain a method ' + \
-                           'called %s' %(method_name))
-
-        list_of_viz = self.container.setdefault(data_entry, []) 
-        list_of_viz.append((method_name, kwargs_dict))
-        self.container[data_entry] = list_of_viz
-
-    def __getitem__(self, key):
-        '''Bla bla
-
-        '''
-        return self.container[key]
-
-    def __init__(self):
-        '''Bla bla
-
-        '''
-        self.container = {}
-        
-        self.available_viz_methods = set([name for name, method in
-                                     inspect.getmembers(Visualizer,
-                                     predicate=inspect.isfunction)])
-
 class EnsembleStat:
     '''Bla bla
 
@@ -60,13 +28,6 @@ class EnsembleStat:
             whatwegot = getattr(summa, attrib)
             if isinstance(whatwegot, Entry):
                 yield whatwegot
-
-    def _randomword(self, length):
-        '''Bla bla
-
-        '''
-        return ''.join(random.choice(string.ascii_lowercase +
-                                     string.digits) for i in range(length))
 
     def add_entries(self, sum_iterator, attrib=None):
         '''Bla bla
@@ -95,33 +56,6 @@ class EnsembleStat:
             raise KeyError('No data summaries with requested labels exist')
 
         return c
-
-    def _setup_db(self, out_file_path='vizfiles.db'):
-        '''Bla bla
-
-        '''
-        conn = sqlite3.connect(out_file_path)
-        c = conn.cursor()
-
-        try:
-            c.execute("CREATE TABLE ensemble_files " + \
-                      "(source_label, summary_label, ensemble_method, " + \
-                      "file_path, file_namespace, created_time)") 
-            conn.commit()
-        except sqlite3.OperationalError:
-            pass
-
-        return conn
-
-    def _insert_db(self, primary, secondary, tertiary, path, ns, time):
-        '''Bla bla
-
-        '''
-        c = self.db_conn.cursor()
-        out_tuple = (primary, secondary, tertiary, path, ns, time)
-        c.execute("INSERT INTO ensemble_files VALUES " + \
-                  "('%s','%s','%s','%s','%s','%s')" %out_tuple)
-        self.db_conn.commit()
 
     def _get_label_iter(self, label_set):
         '''Bla bla
@@ -177,13 +111,6 @@ class EnsembleStat:
                 self._insert_db(summary_union.label, entry.brief, viz_method, 
                                 self.path_viz_out, namespace, now)
             
-
-    def close_db(self):
-        '''Bla bla
-        
-        '''
-        self.db_conn.close()
-
     def __init__(self, iterof_summaries, path_out=None):
         '''Bla bla
 

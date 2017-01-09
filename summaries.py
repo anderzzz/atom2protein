@@ -176,18 +176,3 @@ class PubMedSummarizer:
 
         '''
         pass
-
-class Summarizer:
-    '''Bla bla
-
-    '''
-    def __init__(self, data_type, **kwargs):
-        '''Bla bla
-
-        '''
-        if isinstance(data_type, Structure):
-            self.summarizer = StructureSummarizer(**kwargs)
-        elif isinstance(data_type, PubMedEntry):
-            self.summarizer = PubMedSummarizer(**kwargs)
-        else:
-            raise UnknownDataType('No summarizer exist for data type %s' %(type(data_type)))
