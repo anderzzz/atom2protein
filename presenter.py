@@ -63,7 +63,7 @@ class HowToViz:
                       'y_range' : (-180.0, 180.0),
                       'x_range' : (-180.0, 180.0),
                       'alpha' : 0.5})
-            self.add('nresidues_polarity', 'spider_plot',
+            self.add('rresidues_polarity', 'spider_plot',
                      {'dims' : 'property', 'common_range' : (0.0, 1.0)})
 
         elif default == 'single pubmed':
@@ -94,7 +94,7 @@ class Presenter:
         c = conn.cursor()
 
         try:
-            c.execute("CREATE TABLE ensemble_files " + \
+            c.execute("CREATE TABLE presenter_files " + \
                       "(source_label, summary_label, ensemble_method, " + \
                       "file_path, file_namespace, created_time)") 
             conn.commit()
@@ -127,7 +127,6 @@ class Presenter:
                 viz.write_output(self.file_path, namespace)
                 self._insert_db(self.summary_object.label, entry.brief,
                                 viz_method, self.file_path, namespace, now)
-        raise TypeError
 
     def _validate_subset(self, summary_obj, id_subset, type_subset):
         '''Bla bla

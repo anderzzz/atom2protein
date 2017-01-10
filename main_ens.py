@@ -60,6 +60,11 @@ def main(args):
 
         collector.append(summarizer)
 
+    presenter = Presenter(collector, path_viz_out,
+                          data_type_subset=['rresidues_polarity',
+                                            'bb_torsions'])
+    presenter.produce_visualization()
+
 
 
 if __name__ == '__main__':

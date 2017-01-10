@@ -4,24 +4,10 @@
 from primitivedata import Structure, PubMedEntry
 from calculators import StructureCalculator
 
-import json
 import pandas as pd
-from inspect import getmembers
+from collections import namedtuple
 
-class UnknownDataType(Exception):
-    pass
-
-class Entry:
-    '''Bla bla
-
-    '''
-    def __init__(self, brief, value, verbose=None):
-        '''Bla bla
-
-        '''
-        self.brief = brief
-        self.value = value
-        self.verbose = verbose
+Entry = namedtuple('Entry', 'brief, value, verbose')
 
 class StructureSummarizer:
     '''Bla bla
@@ -99,7 +85,10 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
+        # Initialize the sum Summarizer
         new_summary = StructureSummarizer(self.label + '+' + other.label)
+
+        # Loop over the union of Entry types and perform the Pandas algebra
         a_entries = set(self.__iter__())
         b_entries = set(other.__iter__())
         all_entry_types = a_entries | b_entries
