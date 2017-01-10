@@ -7,7 +7,7 @@ import pprint
 from rootdata import PDBData, PubMedData
 from parsers import Parser
 from summaries import StructureSummarizer
-from ensemble_stat import EnsembleStat
+from presenter import Presenter
 
 def search_pdb():
     pdb_root = PDBData(save_to_disk=True)
@@ -54,17 +54,12 @@ def main(args):
         summarizer.populate_bfactor_chain_stat(structure)
         summarizer.populate_bb_torsions(structure)
 
+        presenter = Presenter(summarizer, path_viz_out, 
+                              data_type_subset=['bb_torsions','nresidues_polarity'])
+        presenter.produce_visualization()
+
         collector.append(summarizer)
 
-    ensemble_stat = EnsembleStat(collector, path_viz_out)
-    ensemble_stat.visualize_individual(label_set=['3tv3','1wm3'],
-                                       entry_types=['bb_torsions',
-                                                    'nresidues',
-                                                    'nresidues_polarity'])
-    ensemble_stat.visualize_union('join',
-                                  label_set=['3tv3','1wm3','3d9a'],
-                                  entry_types=['nresidues_polarity'])
-    ensemble_stat.close_db()
 
 
 if __name__ == '__main__':

@@ -1,16 +1,21 @@
 '''Bla bla
 
 '''
-from visualizer import Visualizer
-from summarizer import StructureSummarizer, PubMedSummarizer
+from visualizers import Visualizer
+from summaries import StructureSummarizer, PubMedSummarizer
+from ensemble_makers import EnsembleMaker
 
-import collections
+import inspect
+import sqlite3
+import datetime
+import random
+import string
 
 class HowToViz:
     '''Bla bla
 
     '''
-    def add_howto(self, data_entry, method_name, kwargs_dict):
+    def add(self, data_entry, method_name, kwargs_dict):
         '''Bla bla
 
         '''
@@ -28,15 +33,48 @@ class HowToViz:
         '''
         return self.container[key]
 
-    def __init__(self):
+    def __init__(self, default=None):
         '''Bla bla
 
         '''
         self.container = {}
-        
         self.available_viz_methods = set([name for name, method in
                                      inspect.getmembers(Visualizer,
                                      predicate=inspect.isfunction)])
+
+        if default == 'single structure':
+            self.add('bb_torsions', 'scatter_plot', 
+                     {'x_axis' : 'phi', 'y_axis' : 'psi',
+                      'level_name' : 'property',
+                      'y_range' : (-180.0, 180.0),
+                      'x_range' : (-180.0, 180.0),
+                      'alpha' : 0.5})
+            self.add('nresidues', 'stacked_bars',
+                     {'x_axis' : 'chain', 'y_axis' : 'residue count',
+                      'stack' : 'property'})
+            self.add('nresidues_polarity', 'stacked_bars',
+                     {'x_axis' : 'chain', 'y_axis' : 'residue count',
+                      'stack' : 'property'})
+
+        elif default == 'summary structure':
+            self.add('bb_torsions', 'scatter_plot',
+                     {'x_axis' : 'phi', 'y_axis' : 'psi',
+                      'level_name' : 'property',
+                      'y_range' : (-180.0, 180.0),
+                      'x_range' : (-180.0, 180.0),
+                      'alpha' : 0.5})
+            self.add('nresidues_polarity', 'spider_plot',
+                     {'dims' : 'property', 'common_range' : (0.0, 1.0)})
+
+        elif default == 'single pubmed':
+            pass
+        elif default == 'summary pubmed':
+            pass
+        elif default is None:
+            pass
+        else:
+            raise KeyError("Undefined default given: %s" %(default))
+        
 class Presenter:
     '''Bla bla
 
@@ -75,25 +113,51 @@ class Presenter:
                   "('%s','%s','%s','%s','%s','%s')" %out_tuple)
         self.db_conn.commit()
 
-    def _ensemble_wrapper(self, func):
+    def produce_visualization(self):
         '''Bla bla
 
         '''
-        def make_ensemble(self):
-                
-            if self.ensemble_summary:
-                self.summary_object = self.ensemble_maker(self.summary_object)
-            else:
-                pass
+        for entry_type in self.type_subset:
+            entry = self.summary_object[entry_type]
+            viz = Visualizer(write_output_format='html')
+            for viz_method, viz_kwargs in self.howtoviz[entry_type]:
+                namespace = self._randomword(15)
+                now = datetime.datetime.now().ctime()
+                getattr(viz, viz_method)(entry.value, **viz_kwargs)
+                viz.write_output(self.file_path, namespace)
+                self._insert_db(self.summary_object.label, entry.brief,
+                                viz_method, self.file_path, namespace, now)
+        raise TypeError
 
-            return func
-
-        return make_ensemble
-
-    def _produce_visualization(self):
+    def _validate_subset(self, summary_obj, id_subset, type_subset):
         '''Bla bla
-
+       
         '''
+        ids = set([])
+        types = set([])
+        if isinstance(summary_obj, (list, set, tuple)):
+            for s in summary_obj:
+                ids.add(s.label)
+                types = types.union(set(s._get_live_entries()))
+        else:
+            ids.add(summary_obj.label)
+            types = types.union(set(summary_obj._get_live_entries()))
+
+        if id_subset is None:
+            ret_1 = ids
+        else:
+            ret_1 = set(id_subset)
+        if type_subset is None:
+            ret_2 = types
+        else:
+            ret_2 = set(type_subset)
+
+        if not ret_1.issubset(ids):
+            raise KeyError("Summary ID subset not subset of IDs of given summary")
+        if not ret_2.issubset(types):
+            raise KeyError("Summary data types subset not subset of data types of given summary")
+            
+        return ret_1, ret_2
 
     def close_db(self):
         '''Bla bla
@@ -101,45 +165,40 @@ class Presenter:
         '''
         self.db_conn.close()
 
-    def make_ensemble(self, **kwargs):
+    def __init__(self, summary_object, file_path, 
+                 howtoviz=None, ensemble_operation='join',
+                 db_path='vizfiles.db', id_subset=None, data_type_subset=None):
         '''Bla bla
 
         '''
-        if self.ensemble_maker is None:
-            self.ensemble_maker = Ensemble
+        self.file_path = file_path
+        self.howtoviz = howtoviz 
+        self.id_subset, self.type_subset = self._validate_subset(summary_object, 
+                                                     id_subset, data_type_subset)
 
-
-    def __init__(self, summary_object, howtoviz=None, ensemble_method='join',
-                 db_path='vizfiles.db'):
-        '''Bla bla
-
-        '''
-        self.summary_object = summary_object
-        self.howtoviz = None
-
-        if isinstance(self.summary_object, collections.Iterable):
+        if isinstance(summary_object, (list, set, tuple)):
             self.ensemble_summary = True
+            self.ensemble_maker = EnsembleMaker(ensemble_operation,
+                                                self.id_subset)
             if self.howtoviz is None:
-                if all(isinstance(s, StructureSummarizer) for s in
-                       self.summary_object):
+                if all(isinstance(s, StructureSummarizer) for s in summary_object):
                     self.howtoviz = HowToViz(default='summary structure')
-                elif all(isinstance(s, PubMedSummarizer) for s in
-                       self.summary_object):
+                elif all(isinstance(s, PubMedSummarizer) for s in summary_object):
                     self.howtoviz = HowToViz(default='summary pubmed')
                 else:
                     raise TypeError("Summary contains objects without a presenter class")
         else:
             self.ensemble_summary = False
+            self.ensemble_maker = EnsembleMaker('unity', None)
             if self.howtoviz is None:
-                if isinstance(self.summary_object, StructureSummarizer):
+                if isinstance(summary_object, StructureSummarizer):
                     self.howtoviz = HowToViz(default='single structure')
-                elif isinstance(self.summary_object, PubMedSummarizer):
+                elif isinstance(summary_object, PubMedSummarizer):
                     self.howtoviz = HowToViz(default='single pubmed')
                 else:
                     raise TypeError("Summary is of type without a presenter class")
 
-        self.ensemble_maker = EnsembleMaker(ensemble_method)
-
-        self.produce_visualization = self._make_ensemble(self._produce_visualization)
+        self.summary_object = self.ensemble_maker(summary_object)
 
         self.db_conn = self._setup_db(out_file_path=db_path)
+
