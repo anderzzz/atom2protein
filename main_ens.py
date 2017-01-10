@@ -7,7 +7,7 @@ import pprint
 from rootdata import PDBData, PubMedData
 from parsers import Parser
 from summaries import StructureSummarizer
-from presenter import Presenter
+from presenter import Presenter, HowToViz
 
 def search_pdb():
     pdb_root = PDBData(save_to_disk=True)
@@ -53,7 +53,6 @@ def main(args):
         summarizer.populate_rresidues_polarity(structure)
         summarizer.populate_bfactor_chain_stat(structure)
         summarizer.populate_bb_torsions(structure)
-        ss = summarizer.groupby(['chain'], sum, ['nresidues_polarity'])
 
         presenter = Presenter(summarizer, path_viz_out, 
                               data_type_subset=['bb_torsions','nresidues_polarity'])
@@ -61,9 +60,13 @@ def main(args):
 
         collector.append(summarizer)
 
-    presenter = Presenter(collector, path_viz_out,
+    ht = HowToViz(default='summary structure')
+    ht.add('bfactor_chain_stat', 'box_plot',
+           {'values' : 'property statistics', 'label' : 'id'})
+    presenter = Presenter(collector, path_viz_out, howtoviz=ht,
                           data_type_subset=['rresidues_polarity',
-                                            'bb_torsions'])
+                                            'bb_torsions',
+                                            'bfactor_chain_stat'])
     presenter.produce_visualization()
 
 

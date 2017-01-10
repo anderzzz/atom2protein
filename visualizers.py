@@ -3,7 +3,7 @@ Bokeh library to connect Python to Javascript.
 
 '''
 from bokeh.embed import components, file_html
-from bokeh.charts import Bar
+from bokeh.charts import Bar, BoxPlot
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import Range1d, HoverTool
 from bokeh.resources import Resources
@@ -103,6 +103,35 @@ class Visualizer:
             p.x_range = Range1d(*x_range) 
         if not y_range is None:
             p.y_range = Range1d(*y_range) 
+
+        self.graph_object = p
+
+    def box_plot(self, df, values, label, outliers=True, title=None):
+        '''Generate box plots.
+
+        Args:
+            df (pandas Series): Data to plot. This should be shaped as a
+                                MultiIndex Pandas Series, where each
+                                level of index is named, and there is one 
+                                column of data, also with a name.
+            values (string): Name of data to obtain data from in order to build
+                             box plot. Should be numeric.
+            label (string): Name of column to obtain category names from to be
+                            displayed on horizontal axis for each box plot.
+            outliers (bool, options): Set to True if outliers are to be shown
+                            as individual dots in box plot. Set to False in
+                            case outliers are merged into the plot.
+            title (string, optional): Title to add at top of data visualization.
+
+        '''
+        # Re-shape data as required by Bokeh
+        df_columnwise = df.reset_index()
+        df_columnwise[values] = df_columnwise[values].astype(float)
+
+        # Make the box plot along with styling settings
+        p = BoxPlot(df_columnwise, values=values, label=label,
+                    title=title, outliers=outliers, legend=self.legend, 
+                    **self.plot_defaults)
 
         self.graph_object = p
 
