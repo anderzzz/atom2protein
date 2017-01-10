@@ -12,33 +12,86 @@ import random
 import string
 
 class HowToViz:
-    '''Bla bla
+    '''Class that defines how to associate type of data with type of
+    visualization. This removes the concern of the data semantics from the
+    visualizer, which thus handles the data as numbers of given shapes and
+    operations applied to it. 
+    
+    Default associations are encoded if a named default category is given
+    during initialization. Additional associations can be dynamically added.
 
     '''
-    def add(self, data_entry, method_name, kwargs_dict):
-        '''Bla bla
+    def add(self, data_entry_type, viz_method_name, kwargs_dict):
+        '''Method to dynamically add an association of data entry type and
+        visualization method and its associated arguments. Note that each data
+        entry type can be associated with multiple visualization methods.
+        Hence, associations are not overwritten.
+
+        Args:
+            data_entry_type (string): Name of data entry type to associate with
+                                      a visualization method.
+            viz_method_name (string): Name of visualization method.
+            kwargs_dict (dict): Dictionary that associates values with
+                                arguments of given visualization method.
+
+        Returns: None
+
+        Raises:
+            KeyError: If a non-existant visualization method is requested.
+                      Note that data entry types are dynamic and a similar
+                      check can only be done for this argument once the
+                      visualization is executed.
 
         '''
-        if not method_name in self.available_viz_methods:
+        if not viz_method_name in self._available_viz_methods:
             raise KeyError('The Visualizer class does not contain a method ' + \
-                           'called %s' %(method_name))
+                           'called %s' %(viz_method_name))
 
-        list_of_viz = self.container.setdefault(data_entry, []) 
-        list_of_viz.append((method_name, kwargs_dict))
-        self.container[data_entry] = list_of_viz
+        list_of_viz = self._container.setdefault(data_entry_type, []) 
+        list_of_viz.append((viz_method_name, kwargs_dict))
+        self._container[data_entry_type] = list_of_viz
 
     def __getitem__(self, key):
-        '''Bla bla
+        '''Return association between the given data entry type and a
+        visualization method.
+
+        Args:
+            key (string): Name of data entry type.
+
+        Returns:
+            viz_association (list): List of 2-member tuples, which encode an
+                                    associated visualization, where first
+                                    element of tuple is name of visualization
+                                    method, and second element of tuple the
+                                    kwargs.
 
         '''
-        return self.container[key]
+        return self._container[key]
 
     def __init__(self, default=None):
-        '''Bla bla
+        '''Initialize class that handles the concern of which visualization
+        method or methods to employ for a given data entry type. 
+
+        Args:
+            default (string, optional): If given, the string denotes a
+                                        particular default of associations to
+                                        use. Observe that additional
+                                        associations can be dynamically added
+                                        after a default has been given. The
+                                        available defaults are:
+                                        * 'single structure': suitable where
+                                        data from one structure is to be
+                                        presented.
+                                        * 'summary structure': suitable where
+                                        data from a plurality of structures is
+                                        to be presented.
+
+        Raises:
+            KeyError: In case invalid default name given.
 
         '''
-        self.container = {}
-        self.available_viz_methods = set([name for name, method in
+        self._container = {}
+        self._available_viz_methods = set([name for name, method in
                                      inspect.getmembers(Visualizer,
                                      predicate=inspect.isfunction)])
 
@@ -109,27 +162,73 @@ class Presenter:
         '''
         c = self.db_conn.cursor()
         out_tuple = (primary, secondary, tertiary, path, ns, time)
-        c.execute("INSERT INTO ensemble_files VALUES " + \
+        c.execute("INSERT INTO presenter_files VALUES " + \
                   "('%s','%s','%s','%s','%s','%s')" %out_tuple)
         self.db_conn.commit()
 
-    def produce_visualization(self):
-        '''Bla bla
+    def produce_visualization(self, output_format='html', name_length=15):
+        '''Produce visualization files and database entry for the specified
+        visualization method and data.
+
+        Args: 
+            output_format (string, optional): Which format to output visualization 
+                                    files in. Must match what is available in the
+                                    Visualizer class.
+            name_length (int, optional): How long the namespace should be of
+                                         visualization files. The longer the
+                                         lower probability of identical
+                                         namespace for distinct visualizations.
+
+        Returns: None
 
         '''
+        # Loop over all specified data entry types
         for entry_type in self.type_subset:
             entry = self.summary_object[entry_type]
-            viz = Visualizer(write_output_format='html')
+
+            # Initialize the Visualizer
+            viz = Visualizer(write_output_format=output_format)
+
+            # Loop over all visualization methods associated with current data
+            # entry type.
             for viz_method, viz_kwargs in self.howtoviz[entry_type]:
-                namespace = self._randomword(15)
-                now = datetime.datetime.now().ctime()
+
+                # Execute the visualization
                 getattr(viz, viz_method)(entry.value, **viz_kwargs)
+
+                # Generate file of visualization and insert entry into database
+                namespace = self._randomword(name_length)
+                now = datetime.datetime.now().ctime()
                 viz.write_output(self.file_path, namespace)
                 self._insert_db(self.summary_object.label, entry.brief,
                                 viz_method, self.file_path, namespace, now)
 
     def _validate_subset(self, summary_obj, id_subset, type_subset):
-        '''Bla bla
+        '''Validate that any specifically enumerated summary IDs or entry types
+        are present in the summary object. If not an exception is raised. If
+        validation successful, return the sets of summary IDs and entry types
+        defined by the subset selection. Note that if the specific selections
+        are set to None, the entire range of summary IDs and entry types are
+        returned.
+
+        Args:
+            summary_obj: The summary object to be presented. The object can be
+                         a single Summary object, or an iterable of Summary
+                         objects.
+            id_subset (list or set): List or set of strings of the summary IDs
+                                     to present. If None, all available
+                                     summaries will be presented.
+            type_subset (list or set): List or set of strings of the entry
+                                       types to present. If None, all available
+                                       entry types will be presented.
+
+        Returns:
+            ret_1 (set): Set of validated summary IDs implied by the input.
+            ret_2 (set): Set of validated entry types implied by the input.
+
+        Raises:
+            KeyError: At least one of the given subsets of IDs or types is
+                      missing from the given Summary object.
        
         '''
         ids = set([])
@@ -137,10 +236,10 @@ class Presenter:
         if isinstance(summary_obj, (list, set, tuple)):
             for s in summary_obj:
                 ids.add(s.label)
-                types = types.union(set(s._get_live_entries()))
+                types = types.union(set(s.__iter__()))
         else:
             ids.add(summary_obj.label)
-            types = types.union(set(summary_obj._get_live_entries()))
+            types = types.union(set(summary_obj.__iter__()))
 
         if id_subset is None:
             ret_1 = ids

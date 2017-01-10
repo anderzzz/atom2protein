@@ -96,17 +96,6 @@ class StructureSummarizer:
 
         return new_summary
 
-    def _get_live_entries(self):
-        '''Bla bla
-
-        '''
-        live_entries = []
-        for member, value in self.entry_collector.items():
-            if isinstance(value, Entry):
-                live_entries.append(member)
-        
-        return live_entries
-
     def _add_id_to(self, df):
         '''Bla bla
 
@@ -175,7 +164,12 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
-        return iter(self._get_live_entries())
+        live_entries = []
+        for member, value in self.entry_collector.items():
+            if isinstance(value, Entry):
+                live_entries.append(member)
+        
+        return iter(live_entries)
 
     def __init__(self, label, nresidues=None, nresidues_polarity=None,
                  rresidues_polarity=None, bfactor_chain_stat=None,
