@@ -53,6 +53,7 @@ def main(args):
         summarizer.populate_rresidues_polarity(structure)
         summarizer.populate_bfactor_chain_stat(structure)
         summarizer.populate_bb_torsions(structure)
+        ss = summarizer.groupby(['chain'], sum, ['nresidues_polarity'])
 
         presenter = Presenter(summarizer, path_viz_out, 
                               data_type_subset=['bb_torsions','nresidues_polarity'])

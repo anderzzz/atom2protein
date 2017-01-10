@@ -30,35 +30,71 @@ class StructureSummarizer:
 
         '''
         value = self._add_id_to(self.calculator.cmp_bb_torsions(structure))
-        self['bb_torsions'] = Entry('backbone torsion angles', value, None)
+        self['bb_torsions'] = Entry('backbone torsion angles', value, '')
 
     def populate_bfactor_chain_stat(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_bfactor_chain_stat(structure))
-        self['bfactor_chain_stat'] = Entry('B-factor chain statistics', value, None)
+        self['bfactor_chain_stat'] = Entry('B-factor chain statistics', value, '')
 
     def populate_nresidues(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_nresidues(structure))
-        self['nresidues'] = Entry('number of residues', value, None)
+        self['nresidues'] = Entry('number of residues', value, '')
 
     def populate_nresidues_polarity(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_nresidues_polarity(structure))
-        self['nresidues_polarity'] = Entry('number of polarity residues', value, None)
+        self['nresidues_polarity'] = Entry('number of polarity residues', value, '')
 
     def populate_rresidues_polarity(self, structure):
         '''Bla bla
 
         '''
         value = self._add_id_to(self.calculator.cmp_rresidues_polarity(structure))
-        self['rresidues_polarity'] = Entry('percentage of polarity residues', value, None)
+        self['rresidues_polarity'] = Entry('percentage of polarity residues', value, '')
+
+    def items(self):
+        '''Bla bla
+
+        '''
+        for x in self:
+            yield (x, self[x])
+
+    def groupby(self, index_reduce, agg_func, entry_subset=None):
+        '''Bla bla
+
+        '''
+        if entry_subset is None:
+            entry_subset = list(self.__iter__())
+
+        new_summary = StructureSummarizer(self.label)
+
+        for entry_type in self:
+
+            if entry_type in entry_subset:
+                serie = self[entry_type].value
+                levels = [x for x in serie.index.names if not x in index_reduce]
+                group_by_pd = serie.groupby(level=levels, axis=0)
+                serie_agg = group_by_pd.agg(agg_func)
+
+                entry_brief = self[entry_type].brief + ' with grouping and aggregation'
+                entry_verbose = self[entry_type].verbose + ' with grouping on ' + \
+                '%s and aggregation by %s' %(str(levels), str(agg_func))
+                new_entry = Entry('grouped on', serie_agg, entry_verbose)
+
+            else:
+                new_entry = self[entry_type]
+
+            new_summary[entry_type] = new_entry
+
+        return new_summary
 
     def _get_live_entries(self):
         '''Bla bla
