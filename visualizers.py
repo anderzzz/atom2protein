@@ -283,6 +283,24 @@ class Visualizer:
 
         return (data, semantics)
 
+    def get_descr(self, method_key):
+        '''Obtain description for a given visualization method. If no
+        description exists for the given key, an empty string is returned.
+
+        Args:
+            method_key (string): Name of visualization method.
+
+        Returns:
+            descr (string): Description text for the visualization method.
+
+        '''
+        try:
+            descr = self._viz_method_descr[method_key]
+        except KeyError:
+            descr = '' 
+
+        return descr
+
     def get_output(self):
         '''Method to return output data for the visualization. The type of
         output data is set during initialization.
@@ -346,3 +364,8 @@ class Visualizer:
         self.bokeh_resource = Resources(mode='cdn')
         self.plot_defaults = {'background_fill_color':background_color}
 
+        self._viz_method_descr = \
+        {'scatter_plot' : 'abc',
+         'spider_plot' : '',
+         'stacked_bars' : '',
+         'box_plot' : ''}

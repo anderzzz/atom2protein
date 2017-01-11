@@ -4,6 +4,7 @@
 from visualizers import Visualizer
 from summaries import StructureSummarizer, PubMedSummarizer
 from ensemble_makers import EnsembleMaker
+from _version import __version__
 
 import inspect
 import sqlite3
@@ -139,8 +140,33 @@ class Presenter:
         return ''.join(random.choice(string.ascii_lowercase +
                                      string.digits) for i in range(length))
 
+    def _entry_metadata(self):
+        '''Create metadata for any database entry.
+
+        Args: None
+
+        Returns:
+            meta (list): List of entry metadata, all strings. This includes in
+                         order a string that describes who/what generated the
+                         entry, the version of the who or what, and the time of
+                         entry.
+
+        '''
+        version = __version__
+        created_by = 'proteinmeta.Presenter'
+        time_of_entry = datetime.datetime.now().ctime()
+
+        return [created_by, version, time_of_entry]
+
     def _setup_db(self, out_file_path):
-        '''Bla bla
+        '''Setup SQL database to track visualizations by the presenter. This
+        includes defining headers.
+
+        Args:
+            out_file_path (string): Path to file at which database will be
+                                    stored.
+
+        Returns: None
 
         '''
         conn = sqlite3.connect(out_file_path)
@@ -148,22 +174,34 @@ class Presenter:
 
         try:
             c.execute("CREATE TABLE presenter_files " + \
-                      "(source_label, summary_label, ensemble_method, " + \
-                      "file_path, file_namespace, created_time)") 
+                      "(created_by, version, created_time, " + \
+                      "id_label, entry_data_type, viz_method, " + \
+                      "id_text, entry_data_text, viz_text, " + \
+                      "file_path, file_namespace)") 
             conn.commit()
         except sqlite3.OperationalError:
             pass
 
         return conn
 
-    def _insert_db(self, primary, secondary, tertiary, path, ns, time):
-        '''Bla bla
+    def _insert_db(self, dynamic_entry):
+        '''Create row entry into the SQL database
+
+        Args:
+            dynamic_entry (list): List of string, where each element of the
+                                  list corresponds to a type of entry as
+                                  defined in the database setup.
+
+        Returns: None
 
         '''
         c = self.db_conn.cursor()
-        out_tuple = (primary, secondary, tertiary, path, ns, time)
-        c.execute("INSERT INTO presenter_files VALUES " + \
-                  "('%s','%s','%s','%s','%s','%s')" %out_tuple)
+        out_row_data = self._entry_metadata()
+        out_row_data += dynamic_entry
+        out_row_data = ["'%s'"%(x) for x in out_row_data]
+        out_row_str = ','.join(out_row_data)
+        print ("VALUES %s" %(out_row_str))
+        c.execute("INSERT INTO presenter_files VALUES (%s)" %(out_row_str))
         self.db_conn.commit()
 
     def produce_visualization(self, output_format='html', name_length=15):
@@ -198,10 +236,11 @@ class Presenter:
 
                 # Generate file of visualization and insert entry into database
                 namespace = self._randomword(name_length)
-                now = datetime.datetime.now().ctime()
                 viz.write_output(self.file_path, namespace)
-                self._insert_db(self.summary_object.label, entry.brief,
-                                viz_method, self.file_path, namespace, now)
+                args = [self.summary_object.label, entry_type, viz_method,
+                        '', entry.verbose, viz.get_descr(viz_method),
+                        self.file_path, namespace]
+                self._insert_db(args)
 
     def _validate_subset(self, summary_obj, id_subset, type_subset):
         '''Validate that any specifically enumerated summary IDs or entry types
