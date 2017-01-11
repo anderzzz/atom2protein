@@ -200,7 +200,6 @@ class Presenter:
         out_row_data += dynamic_entry
         out_row_data = ["'%s'"%(x) for x in out_row_data]
         out_row_str = ','.join(out_row_data)
-        print ("VALUES %s" %(out_row_str))
         c.execute("INSERT INTO presenter_files VALUES (%s)" %(out_row_str))
         self.db_conn.commit()
 
