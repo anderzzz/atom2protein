@@ -2,6 +2,9 @@
 
 '''
 from _version import __version__
+import django
+django.setup()
+import django_backend.protein_img_api.protein_imgs.models
 
 import sqlite3
 import datetime
@@ -42,6 +45,19 @@ class DBHandler:
         c.execute("INSERT INTO %s VALUES (%s)" %(self.table_name, out_row_str))
         self.conn.commit()
 
+    def _django_entry(self, dynamic_entry, who_entered):
+        '''Bla bla
+
+        '''
+        out_row_data = self._entry_metadata(who_entered)
+        out_row_data += dynamic_entry
+        out_row_key = ['created_by','created_by_version','created_time','id_label',
+                       'entry_data_type','viz_method','id_text','entry_data_text',
+                       'viz_text','file_path','file_namespace']
+        fields = dict([(x, y) for x, y in zip(out_row_key, out_row_data)])
+        p = django_backend.protein_img_api.protein_imgs.models.PresenterDataViz(**fields)
+        p.save()
+
     def close(self):
         '''Bla bla
 
@@ -49,7 +65,7 @@ class DBHandler:
         self.conn.close()
 
     def __init__(self, db_method_name, static_file_path, db_file_path, 
-                 table_name=None, headers=None):
+                 table_name=None, headers=None, django_model=None):
         '''Bla bla
 
         '''
@@ -72,7 +88,7 @@ class DBHandler:
             self.make_db_entry = self._local_entry
 
         elif db_method_name == 'django':
-            pass
+            self.make_db_entry = self._django_entry
 
         else:
             raise AttributeError("Database method %s does not exist" %(db_method_name))

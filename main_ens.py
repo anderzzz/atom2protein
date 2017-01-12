@@ -41,7 +41,7 @@ def main(args):
     data_parser = Parser(PDBData(), 'xml_file')
 
     path = '/home/anderzzz/ideas/protein/'
-    db_handler = DBHandler('local', path + 'viz_output/', path + 'vizout.db',
+    db_handler = DBHandler('django', path + 'viz_output/', path + 'vizout.db',
                            table_name='presenter_files',
                            headers=['created_by','version',
                                  'created_time','id_label','entry_data_type',
