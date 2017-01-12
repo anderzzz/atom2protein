@@ -4,7 +4,7 @@
 from _version import __version__
 import django
 django.setup()
-import django_backend.protein_img_api.protein_imgs.models
+import server.presenter_webapp.models
 
 import sqlite3
 import datetime
@@ -55,7 +55,7 @@ class DBHandler:
                        'entry_data_type','viz_method','id_text','entry_data_text',
                        'viz_text','file_path','file_namespace']
         fields = dict([(x, y) for x, y in zip(out_row_key, out_row_data)])
-        p = django_backend.protein_img_api.protein_imgs.models.PresenterDataViz(**fields)
+        p = server.presenter_webapp.models.PresenterDataViz(**fields)
         p.save()
 
     def close(self):
