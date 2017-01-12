@@ -1,0 +1,3 @@
+Add the Django server code here. The database module and manage.py script
+access it, and assume the web app is called presenter_webapp and the project
+presenter_api.
