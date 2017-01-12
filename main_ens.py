@@ -8,6 +8,7 @@ from rootdata import PDBData, PubMedData
 from parsers import Parser
 from summaries import StructureSummarizer
 from presenter import Presenter, HowToViz
+from database import DBHandler
 
 def search_pdb():
     pdb_root = PDBData(save_to_disk=True)
@@ -38,10 +39,18 @@ def main(args):
 #    sys.exit() 
 
     data_parser = Parser(PDBData(), 'xml_file')
-    path_viz_out = '/home/anderzzz/ideas/protein/viz_output'
+
     path = '/home/anderzzz/ideas/protein/'
+    db_handler = DBHandler('local', path + 'viz_output/', path + 'vizout.db',
+                           table_name='presenter_files',
+                           headers=['created_by','version',
+                                 'created_time','id_label','entry_data_type',
+                                 'viz_method', 'id_text', 'entry_data_text',
+                                 'viz_text', 'file_path', 'file_namespace'])
+
     pdb_files = ['protein_3tv3.xml', 'protein_1wm3.xml',
     'protein_3a4r.xml','protein_3r0m.xml','protein_3d9a.xml']
+
     collector = []
     for pdb_file in pdb_files:
         structure = data_parser(path + pdb_file)
@@ -54,7 +63,7 @@ def main(args):
         summarizer.populate_bfactor_chain_stat(structure)
         summarizer.populate_bb_torsions(structure)
 
-        presenter = Presenter(summarizer, path_viz_out, 
+        presenter = Presenter(summarizer, db_handler,
                               data_type_subset=['bb_torsions','nresidues_polarity'])
         presenter.produce_visualization()
 
@@ -63,7 +72,7 @@ def main(args):
     ht = HowToViz(default='summary structure')
     ht.add('bfactor_chain_stat', 'box_plot',
            {'values' : 'property statistics', 'label' : 'id'})
-    presenter = Presenter(collector, path_viz_out, howtoviz=ht,
+    presenter = Presenter(collector, db_handler, howtoviz=ht,
                           data_type_subset=['rresidues_polarity',
                                             'bb_torsions',
                                             'bfactor_chain_stat'])

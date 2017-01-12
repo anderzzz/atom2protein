@@ -140,69 +140,6 @@ class Presenter:
         return ''.join(random.choice(string.ascii_lowercase +
                                      string.digits) for i in range(length))
 
-    def _entry_metadata(self):
-        '''Create metadata for any database entry.
-
-        Args: None
-
-        Returns:
-            meta (list): List of entry metadata, all strings. This includes in
-                         order a string that describes who/what generated the
-                         entry, the version of the who or what, and the time of
-                         entry.
-
-        '''
-        version = __version__
-        created_by = 'proteinmeta.Presenter'
-        time_of_entry = datetime.datetime.now().ctime()
-
-        return [created_by, version, time_of_entry]
-
-    def _setup_db(self, out_file_path):
-        '''Setup SQL database to track visualizations by the presenter. This
-        includes defining headers.
-
-        Args:
-            out_file_path (string): Path to file at which database will be
-                                    stored.
-
-        Returns: None
-
-        '''
-        conn = sqlite3.connect(out_file_path)
-        c = conn.cursor()
-
-        try:
-            c.execute("CREATE TABLE presenter_files " + \
-                      "(created_by, version, created_time, " + \
-                      "id_label, entry_data_type, viz_method, " + \
-                      "id_text, entry_data_text, viz_text, " + \
-                      "file_path, file_namespace)") 
-            conn.commit()
-        except sqlite3.OperationalError:
-            pass
-
-        return conn
-
-    def _insert_db(self, dynamic_entry):
-        '''Create row entry into the SQL database
-
-        Args:
-            dynamic_entry (list): List of string, where each element of the
-                                  list corresponds to a type of entry as
-                                  defined in the database setup.
-
-        Returns: None
-
-        '''
-        c = self.db_conn.cursor()
-        out_row_data = self._entry_metadata()
-        out_row_data += dynamic_entry
-        out_row_data = ["'%s'"%(x) for x in out_row_data]
-        out_row_str = ','.join(out_row_data)
-        c.execute("INSERT INTO presenter_files VALUES (%s)" %(out_row_str))
-        self.db_conn.commit()
-
     def produce_visualization(self, output_format='html', name_length=15):
         '''Produce visualization files and database entry for the specified
         visualization method and data.
@@ -236,10 +173,11 @@ class Presenter:
                 # Generate file of visualization and insert entry into database
                 namespace = self._randomword(name_length)
                 viz.write_output(self.file_path, namespace)
-                args = [self.summary_object.label, entry_type, viz_method,
+
+                data = (self.summary_object.label, entry_type, viz_method,
                         '', entry.verbose, viz.get_descr(viz_method),
-                        self.file_path, namespace]
-                self._insert_db(args)
+                        self.file_path, namespace)
+                self.db_entry(data, 'Presenter.produce_visualization')
 
     def _validate_subset(self, summary_obj, id_subset, type_subset):
         '''Validate that any specifically enumerated summary IDs or entry types
@@ -295,19 +233,13 @@ class Presenter:
             
         return ret_1, ret_2
 
-    def close_db(self):
-        '''Bla bla
-        
-        '''
-        self.db_conn.close()
-
-    def __init__(self, summary_object, file_path, 
+    def __init__(self, summary_object, db_handler,
                  howtoviz=None, ensemble_operation='join',
-                 db_path='vizfiles.db', id_subset=None, data_type_subset=None):
+                 id_subset=None, data_type_subset=None):
         '''Bla bla
 
         '''
-        self.file_path = file_path
+        self.file_path = db_handler.static_file_path
         self.howtoviz = howtoviz 
         self.id_subset, self.type_subset = self._validate_subset(summary_object, 
                                                      id_subset, data_type_subset)
@@ -336,5 +268,5 @@ class Presenter:
 
         self.summary_object = self.ensemble_maker(summary_object)
 
-        self.db_conn = self._setup_db(out_file_path=db_path)
+        self.db_entry = db_handler.make_db_entry
 
