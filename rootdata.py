@@ -1,15 +1,13 @@
-'''The raw data to analyze can be retrieved via open Web APIs. The classes in
-this module contain the logic to do so for a set number of third-party Web REST APIs. The
-intent of these classes is to remove the need for the user to know the details
-of each API and in what format requests and responses are defined. Instead each
-class contains a number of methods to define search criteria with a clear
-semantic. 
+'''Configure search and retrival of raw data from third-party Web APIs. 
 
-Each class is designed such that upon calling the `search` method the class
+The raw data to analyze can be retrieved via open Web APIs. The classes in
+this module contain the logic to do so for a set number of third-party Web REST APIs. 
+
+Each class is designed such that upon calling the ``search`` method the class
 instance is populated with the raw data returned by the Web API. Each element
 of raw data is retrieved in no particular order by iterating over the
 particular instance. Any further analysis is done by passing the raw data into
-an instance of the `Parser` class.
+an instance of the ``Parser`` class.
 
 '''
 from urllib.request import urlopen
@@ -21,52 +19,83 @@ class DownloadError(Exception):
 
 class WebService:
     '''General purpose class for accessing data from and posting data to web
-    servers, particularly through REST APIs. The class methods are not
-    concerned with the nature of the data. Typically this class is used as a
-    parent to other classes.
+    servers. 
+        
+    The class methods are not concerned with the nature of the data. Typically 
+    this class is used as a parent to other classes.
+
+    Parameters
+    ----------
+    out_prefix : string, default '' 
+        In case retrieved raw-data is to be saved to disk, what string to
+        prefix the file name with.
+    out_suffix : string, default ''
+        In case retrieved raw-data is to be saved to disk, what string to
+        append to the end of the file name.
+
+    Methods
+    -------
+    set_id(ids)
+        Set ids of items to extract from external server.
+    get_id()
+        Get list of strings of ids that have been set.
+    get(http_string)
+        Execute the HTTP GET command on the given URI.
+    post(http_string, data)
+        Execute the HTTP POST command on the given URI with given data being
+        posted.
+    save(id_name, data)
+        Save string of raw-data to disk
 
     '''
     def set_id(self, ids):
-        '''Set ids of items to extract
+        '''Set ids of items to extract.
 
-        Args:
-            ids (iterable): Iterable of strings of IDs
+        Parameters
+        ----------
+        ids : iterable 
+            Iterable of strings of IDs.
 
-        Returns: None
-
-        Raises:
-            TypeError: If one or more elements of ids iterable is not a string
+        Raises
+        ------
+        TypeError 
+            If one or more elements of `ids` iterable is not a string.
 
         '''
         if not all([isinstance(val, str) for val in ids]):
             raise TypeError('Not all ids are strings')
         else:
-            self.item_ids = [val.lower() for val in ids]
+            self._item_ids = [val.lower() for val in ids]
 
     def get_id(self):
         '''Return ids of items set so far.
 
-        Args: None
-
-        Returns:
-            ids (list): List of string identifiers
+        Returns
+        -------
+        ids : list
+            List of string identifiers
 
         '''
-        return self.item_ids
+        return self._item_ids
 
     def get(self, http_string):
         '''Wrapper to execute the HTTP GET command and to check response and
         convert any output to a string.
 
-        Args:
-            http_string (string): The HTTP Request-URI
+        Parameters
+        ----------
+        http_string : string
+            The HTTP request URI.
 
-        Returns:
-            content_str (string): The returned item following the request
-                                  operation.
+        Returns
+        -------
+        content_str : string 
+            The returned item following the request operation.
 
-        Raises:
-            DownloadError: In case the HTTP status suggests an error
+        Raises
+        ------
+        DownloadError
+            In case the HTTP status suggests an error.
 
         '''
         response = urlopen(http_string)
@@ -81,16 +110,22 @@ class WebService:
         '''Wrapper to execute the HTTP POST command and to check response and
         convery any uotput to a string.
 
-        Args:
-            http_string (string): The HTTP Request-URI
-            data (string): The data to post
+        Parameters
+        ----------
+        http_string : string 
+            The HTTP request URI. 
+        data : string
+            The data to post.
 
-        Returns:
-            content_str (string): The returned item following the request
-                                  operation.
+        Returns
+        -------
+        content_str : string
+            The returned item following the request operation.
 
-        Raises:
-            DownloadError: In case the HTTP status suggests an error
+        Raises
+        ------
+        DownloadError 
+            In case the HTTP status suggests an error.
 
         '''
         response = urlopen(http_string, data=data)
@@ -105,11 +140,12 @@ class WebService:
         '''Save string of data to disk with file naming as configured during
         initialization.
 
-        Args:
-            id_name (string): Unique data identifier to be used in file name
-            data (string): Data to be saved to disk
-
-        Returns: None
+        Parameters
+        ----------
+        id_name : string 
+            Unique data identifier to be used in file name.
+        data : string 
+            Data to be saved to disk.
 
         '''
         name_out = self.out_prefix + id_name
@@ -123,12 +159,16 @@ class WebService:
     def _check_response(self, resp):
         '''Tests the HTTP return status in a reponse
 
-        Args:
-            resp (dict): Dictionary returned by the httplib2 after a GET call
-                         to a web server
+        Parameters
+        ----------
+        resp : dict
+            Dictionary returned by the httplib2 after a GET call to a web
+            server.
 
-        Returns:
-            status200 (bool): True if return status is 200, False otherwise.
+        Returns
+        -------
+        status200 : bool
+            True if return status is 200, False otherwise.
 
         '''
         if resp.status == 200:
@@ -139,10 +179,8 @@ class WebService:
         return ret 
 
     def __init__(self, out_prefix='', out_suffix=''):
-        '''Bla bla
 
-        '''
-        self.item_ids = []
+        self._item_ids = []
         self.out_prefix = out_prefix
         self.out_suffix = out_suffix
 
@@ -308,7 +346,7 @@ class PDBData(WebService):
                                   file format.
 
         '''
-        for item_name in self.item_ids:
+        for item_name in self._item_ids:
             http_string = self.url_filebase + item_name + '.xml'
             content_str = self.get(http_string)
 
@@ -492,7 +530,7 @@ class PubMedData(WebService):
             content_str (string): String of pubmed data.
 
         '''
-        for item_id in self.item_ids:
+        for item_id in self._item_ids:
             fetch_terms = ['tool=' + self.tool, 'email=' + self.email]
             fetch_terms += ['db=pubmed', 'retmode=xml', 'rettype=xml']
             fetch_terms += ['id=' + item_id]

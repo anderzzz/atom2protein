@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to proteinmeta’s documentation! &#8212; proteinmeta 0 documentation</title>
+    <title>Welcome to proteinmeta’s documentation &#8212; proteinmeta 0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -42,8 +42,387 @@
           <div class="body" role="main">
             
   <div class="section" id="welcome-to-proteinmeta-s-documentation">
-<h1>Welcome to proteinmeta&#8217;s documentation!<a class="headerlink" href="#welcome-to-proteinmeta-s-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>Welcome to proteinmeta&#8217;s documentation<a class="headerlink" href="#welcome-to-proteinmeta-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
+</div>
+<p>The <cite>proteinmeta</cite> library enables the retrieval of protein data, analysis
+thereof, and the graphical or tabular presentation of analysis outcomes. Each
+of the three components can be configured.</p>
+<p>The library is implemented as a set of classes and relations between them. The
+three main components (retrieval, analysis and presentation) are described in
+separate section below. The corresponding classes instantiates other subclasses
+to perform the operations. These subclasses are documented in the relevant
+sections. Although the subclasses can be used directly by an application that
+uses the <cite>proteinmeta</cite> library, the typical application is not expected to do
+so, but rely on instantiations of the primary class only.</p>
+<div class="section" id="retrieval-of-protein-data">
+<h2>Retrieval of Protein Data<a class="headerlink" href="#retrieval-of-protein-data" title="Permalink to this headline">¶</a></h2>
+<p>The protein data can be retrieved via third-party Web APIs. The details of the
+Web APIs are hidden to the user, who only configure the call to the APIs via
+class methods, as described below. The raw data obtained are passed to a
+parser, which translate the raw data into an object on which analysis is
+applied. Alternatively, the raw data can be read from files stored on the local
+disk, then passed to the parser.</p>
+<span class="target" id="module-rootdata"></span><p>Configure search and retrival of raw data from third-party Web APIs.</p>
+<p>The raw data to analyze can be retrieved via open Web APIs. The classes in
+this module contain the logic to do so for a set number of third-party Web REST APIs.</p>
+<p>Each class is designed such that upon calling the <code class="docutils literal"><span class="pre">search</span></code> method the class
+instance is populated with the raw data returned by the Web API. Each element
+of raw data is retrieved in no particular order by iterating over the
+particular instance. Any further analysis is done by passing the raw data into
+an instance of the <code class="docutils literal"><span class="pre">Parser</span></code> class.</p>
+<dl class="class">
+<dt id="rootdata.PDBData">
+<em class="property">class </em><code class="descclassname">rootdata.</code><code class="descname">PDBData</code><span class="sig-paren">(</span><em>save_to_disk=False</em>, <em>print_list_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to query the PDB databank available at <a class="reference external" href="http://www.rcsb.org/pdb">http://www.rcsb.org/pdb</a>
+using advanced search queries. The class also retrieves the data associated
+with the queried structure identifiers, in other words, entire PDB files
+can be obtained. The XML format is preferred.</p>
+<p>Helpful documentation on the PDB Databank REST API is found at
+<a class="reference external" href="http://www.rcsb.org/pdb/software/rest.do">http://www.rcsb.org/pdb/software/rest.do</a></p>
+<dl class="method">
+<dt id="rootdata.PDBData.search">
+<code class="descname">search</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to execute a configured search and retrieve the PDB IDs of
+the structures that satisfies search query.</p>
+<p>Args: None</p>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PDBData.set_search_depositdate">
+<code class="descname">set_search_depositdate</code><span class="sig-paren">(</span><em>date_min</em>, <em>date_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.set_search_depositdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.set_search_depositdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define lower and upper bound for deposit date in a search query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date_min</strong> (<em>string</em>) &#8211; Earliest despoit date in format YYYY-MM-DD</li>
+<li><strong>date_max</strong> (<em>string</em>) &#8211; Latest deposit date in format YYYY-MM-DD</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PDBData.set_search_description">
+<code class="descname">set_search_description</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.set_search_description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.set_search_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define string part of structure description in a search query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>val</strong> (<em>string</em>) &#8211; Text to be part of structure description</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PDBData.set_search_molweight">
+<code class="descname">set_search_molweight</code><span class="sig-paren">(</span><em>weight_min</em>, <em>weight_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.set_search_molweight"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.set_search_molweight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define lower and upper bound for molecular weight in a search query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>weight_min</strong> (<em>float</em>) &#8211; Lowest molecular weight</li>
+<li><strong>weight_max</strong> (<em>float</em>) &#8211; Highest molecular weight</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PDBData.set_search_pubmedid">
+<code class="descname">set_search_pubmedid</code><span class="sig-paren">(</span><em>idlist</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.set_search_pubmedid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.set_search_pubmedid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define pubmed identifiers to be associated with structures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>idlist</strong> (<em>list</em>) &#8211; List of integer PubMed identifiers.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PDBData.set_search_resolution">
+<code class="descname">set_search_resolution</code><span class="sig-paren">(</span><em>res_min</em>, <em>res_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.set_search_resolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.set_search_resolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define lower and upper bound of X-ray resolution in a search query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>res_min</strong> (<em>float</em>) &#8211; Lower bound of resolution in units of AA</li>
+<li><strong>res_max</strong> (<em>float</em>) &#8211; Upper bound of resolution in units of AA</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PDBData.set_search_title">
+<code class="descname">set_search_title</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PDBData.set_search_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PDBData.set_search_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define string part of structure title in a search query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>val</strong> (<em>string</em>) &#8211; Text to be part of structure title</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rootdata.PubMedData">
+<em class="property">class </em><code class="descclassname">rootdata.</code><code class="descname">PubMedData</code><span class="sig-paren">(</span><em>save_to_disk=False</em>, <em>print_list_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PubMedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PubMedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to query the PubMed database available at
+<a class="reference external" href="http://www.ncbi.nlm.nih.gov/pubmed/">http://www.ncbi.nlm.nih.gov/pubmed/</a>
+using advanced search queries. The class also retrieves the data associated
+with the queried publication identifiers in the JSON format.</p>
+<p>Helpful documentation on the PubMed REST API is found at
+<a class="reference external" href="http://www.ncbi.nlm.nih.gov/books/NBK25501/">http://www.ncbi.nlm.nih.gov/books/NBK25501/</a></p>
+<dl class="method">
+<dt id="rootdata.PubMedData.search">
+<code class="descname">search</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PubMedData.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PubMedData.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the query of the PubMed database as set above. The function
+constructs the parametes to the GET call and sets the list of PMIDs.</p>
+<p>Args: None</p>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PubMedData.set_retmax">
+<code class="descname">set_retmax</code><span class="sig-paren">(</span><em>retmax</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PubMedData.set_retmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PubMedData.set_retmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bla bla</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PubMedData.set_search_abstract">
+<code class="descname">set_search_abstract</code><span class="sig-paren">(</span><em>title_and_abstract</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PubMedData.set_search_abstract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PubMedData.set_search_abstract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set condition on text in title or abstract for query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>title_and_abstract</strong> (<em>string</em>) &#8211; Text to be present in title or
+abstract. Whitespace allowed.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PubMedData.set_search_journal">
+<code class="descname">set_search_journal</code><span class="sig-paren">(</span><em>journal_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PubMedData.set_search_journal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PubMedData.set_search_journal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of the journal for query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>journal_name</strong> (<em>string</em>) &#8211; Name of journal. Whitespace allowed.</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.PubMedData.set_search_publishdate">
+<code class="descname">set_search_publishdate</code><span class="sig-paren">(</span><em>date_min</em>, <em>date_max</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#PubMedData.set_search_publishdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.PubMedData.set_search_publishdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set condition on publication date for query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date_min</strong> (<em>string</em>) &#8211; Earliest publication date, format YYYYMMDD</li>
+<li><strong>date_max</strong> (<em>string</em>) &#8211; Most recent publication date, format YYYYMMDD</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rootdata.WebService">
+<em class="property">class </em><code class="descclassname">rootdata.</code><code class="descname">WebService</code><span class="sig-paren">(</span><em>out_prefix=''</em>, <em>out_suffix=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.WebService" title="Permalink to this definition">¶</a></dt>
+<dd><p>General purpose class for accessing data from and posting data to web
+servers.</p>
+<p>The class methods are not concerned with the nature of the data. Typically
+this class is used as a parent to other classes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>out_prefix</strong> (<em>string</em><em>, </em><em>default ''</em>) &#8211; In case retrieved raw-data is to be saved to disk, what string to
+prefix the file name with.</li>
+<li><strong>out_suffix</strong> (<em>string</em><em>, </em><em>default ''</em>) &#8211; In case retrieved raw-data is to be saved to disk, what string to
+append to the end of the file name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="rootdata.WebService.set_id">
+<code class="descname">set_id</code><span class="sig-paren">(</span><em>ids</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.set_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.WebService.set_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set ids of items to extract from external server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.WebService.get_id">
+<code class="descname">get_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.get_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.WebService.get_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of strings of ids that have been set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.WebService.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>http_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.WebService.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the HTTP GET command on the given URI.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.WebService.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>http_string</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.WebService.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the HTTP POST command on the given URI with given data being
+posted.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootdata.WebService.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>id_name</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootdata.WebService.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save string of raw-data to disk</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">get</code><span class="sig-paren">(</span><em>http_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.get"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Wrapper to execute the HTTP GET command and to check response and
+convert any output to a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>http_string</strong> (<em>string</em>) &#8211; The HTTP request URI.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>content_str</strong> &#8211; The returned item following the request operation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">DownloadError</span></code> &#8211; In case the HTTP status suggests an error.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">get_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.get_id"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return ids of items set so far.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>ids</strong> &#8211; List of string identifiers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">post</code><span class="sig-paren">(</span><em>http_string</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.post"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Wrapper to execute the HTTP POST command and to check response and
+convery any uotput to a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>http_string</strong> (<em>string</em>) &#8211; The HTTP request URI.</li>
+<li><strong>data</strong> (<em>string</em>) &#8211; The data to post.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>content_str</strong> &#8211; The returned item following the request operation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">string</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">DownloadError</span></code> &#8211; In case the HTTP status suggests an error.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>id_name</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.save"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Save string of data to disk with file naming as configured during
+initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id_name</strong> (<em>string</em>) &#8211; Unique data identifier to be used in file name.</li>
+<li><strong>data</strong> (<em>string</em>) &#8211; Data to be saved to disk.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">set_id</code><span class="sig-paren">(</span><em>ids</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rootdata.html#WebService.set_id"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Set ids of items to extract.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ids</strong> (<em>iterable</em>) &#8211; Iterable of strings of IDs.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">TypeError</span></code> &#8211; If one or more elements of <cite>ids</cite> iterable is not a string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -63,7 +442,10 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to proteinmeta&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#">Welcome to proteinmeta&#8217;s documentation</a><ul>
+<li><a class="reference internal" href="#retrieval-of-protein-data">Retrieval of Protein Data</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 <div class="relations">
