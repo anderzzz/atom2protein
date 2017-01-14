@@ -10,6 +10,8 @@ Welcome to proteinmeta's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. automodule:: rootdata
+
 
 
 Indices and tables
