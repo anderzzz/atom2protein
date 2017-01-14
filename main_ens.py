@@ -65,7 +65,7 @@ def main(args):
 
         presenter = Presenter(summarizer, db_handler,
                               data_type_subset=['bb_torsions','nresidues_polarity'])
-        presenter.produce_visualization()
+        presenter.produce_visualization(output_format='javascript')
 
         collector.append(summarizer)
 
@@ -76,7 +76,7 @@ def main(args):
                           data_type_subset=['rresidues_polarity',
                                             'bb_torsions',
                                             'bfactor_chain_stat'])
-    presenter.produce_visualization()
+    presenter.produce_visualization(output_format='javascript')
 
 
 

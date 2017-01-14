@@ -1,4 +1,15 @@
-'''Bla bla
+'''The raw data to analyze can be retrieved via open Web APIs. The classes in
+this module contain the logic to do so for a set number of third-party Web REST APIs. The
+intent of these classes is to remove the need for the user to know the details
+of each API and in what format requests and responses are defined. Instead each
+class contains a number of methods to define search criteria with a clear
+semantic. 
+
+Each class is designed such that upon calling the `search` method the class
+instance is populated with the raw data returned by the Web API. Each element
+of raw data is retrieved in no particular order by iterating over the
+particular instance. Any further analysis is done by passing the raw data into
+an instance of the `Parser` class.
 
 '''
 from urllib.request import urlopen
