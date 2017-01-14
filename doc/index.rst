@@ -10,6 +10,8 @@ Welcome to proteinmeta's documentation
    :maxdepth: 2
    :caption: Contents:
 
+   data_retrieve
+
 The ``proteinmeta`` library enables the retrieval of protein data, analysis
 thereof, and the graphical or tabular presentation of analysis outcomes. Each
 of the three components can be configured.
@@ -21,27 +23,6 @@ to perform the operations. These subclasses are documented in the relevant
 sections. Although the subclasses can be used directly by an application that
 uses the ``proteinmeta`` library, the typical application is not expected to do
 so, but rely on instantiations of the primary class only.
-
-Retrieval of Protein Data
--------------------------
-The protein data can be retrieved via third-party Web APIs. The details of the
-Web APIs are hidden to the user, who only configure the call to the APIs via
-class methods, as described below. The raw data obtained are passed to a
-parser, which translate the raw data into an object on which analysis is
-applied. Alternatively, the raw data can be read from files stored on the local
-disk, then passed to the parser. 
-
-.. automodule:: rootdata
-    :members: 
-
-Summarization of Protein Data
------------------------------
-Bla bla
-
-Presentation of Summarization
------------------------------
-Bla bla
-
 
 Indices and tables
 ==================
