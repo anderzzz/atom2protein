@@ -33,20 +33,6 @@ class WebService:
         In case retrieved raw-data is to be saved to disk, what string to
         append to the end of the file name.
 
-    Methods
-    -------
-    set_id(ids)
-        Set ids of items to extract from external server.
-    get_id()
-        Get list of strings of ids that have been set.
-    get(http_string)
-        Execute the HTTP GET command on the given URI.
-    post(http_string, data)
-        Execute the HTTP POST command on the given URI with given data being
-        posted.
-    save(id_name, data)
-        Save string of raw-data to disk
-
     '''
     def set_id(self, ids):
         '''Set ids of items to extract.
@@ -186,21 +172,50 @@ class WebService:
 
 class PDBData(WebService):
     '''Class to query the PDB databank available at http://www.rcsb.org/pdb
-    using advanced search queries. The class also retrieves the data associated
-    with the queried structure identifiers, in other words, entire PDB files
-    can be obtained. The XML format is preferred. 
+    using advanced search queries.
+    
+    The class enables the query of the PDB databank for protein structures that
+    meets configurable criteria, and the class can be used to retrieve the data 
+    associated with a set of structure identifiers, in other words, entire 
+    PDB files can be obtained. If desired, structure files in the XML format
+    can be saved to disk.
 
-    Helpful documentation on the PDB Databank REST API is found at
-    http://www.rcsb.org/pdb/software/rest.do
+    Parameters
+    -----------
+    save_to_disk, bool, default False
+        Parameter that sets if structure data should be saved to disk in
+        addition to being a string in memory.
+
+    Yields 
+    -------
+    structure_data : string
+        The XML raw data of the protein structure, an element of the subset of
+        protein structures that satisfy the search query.
+
+    Notes
+    -----
+    The typical workflow of this class is:
+
+    1. Initialize the class.
+    2. Execute the relevant ``set_search`` methods.
+    3. Execute the ``search`` method.
+    4. Iterate over the class instance to retrieve the raw data.
+
+    References
+    ----------
+    - The PDB databank web interface is available from: 
+      http://www.rcsb.org/pdb.
+    - Documentation on the PDB Databank REST API is here:
+      http://www.rcsb.org/pdb/software/rest.do.
 
     '''
     def set_search_pubmedid(self, idlist):
         '''Define pubmed identifiers to be associated with structures.
 
-        Args:
-            idlist (list): List of integer PubMed identifiers.
-
-        Returns: None
+        Parameters
+        ----------
+        idlist : list 
+            List of integer PubMed identifiers.
 
         '''
         params = {}
@@ -212,10 +227,10 @@ class PDBData(WebService):
     def set_search_description(self, val):
         '''Define string part of structure description in a search query.
 
-        Args:
-            val (string): Text to be part of structure description
-
-        Returns: None
+        Parameters
+        ----------
+        val : string
+            Text to be part of structure description
 
         '''
         params = {}
@@ -228,11 +243,12 @@ class PDBData(WebService):
     def set_search_resolution(self, res_min, res_max):
         '''Define lower and upper bound of X-ray resolution in a search query.
 
-        Args:
-            res_min (float): Lower bound of resolution in units of AA
-            res_max (float): Upper bound of resolution in units of AA
-
-        Returns: None
+        Parameters
+        ----------
+        res_min : float
+            Lower bound of resolution in units of Angstrom.
+        res_max : float
+            Upper bound of resolution in units of Angstrom.
 
         '''
         params = {}
@@ -246,10 +262,10 @@ class PDBData(WebService):
     def set_search_title(self, val):
         '''Define string part of structure title in a search query.
 
-        Args:
-            val (string): Text to be part of structure title
-
-        Returns: None
+        Parameters
+        ----------
+        val : string
+            Text to be part of structure title.
 
         '''
         params = {}
@@ -262,11 +278,12 @@ class PDBData(WebService):
     def set_search_depositdate(self, date_min, date_max):
         '''Define lower and upper bound for deposit date in a search query.
 
-        Args:
-            date_min (string): Earliest despoit date in format YYYY-MM-DD
-            date_max (string): Latest deposit date in format YYYY-MM-DD
-
-        Returns: None
+        Parameters
+        ----------
+        date_min : string
+            Earliest despoit date in format YYYY-MM-DD.
+        date_max : string
+            Latest deposit date in format YYYY-MM-DD.
 
         '''
         params = {}
@@ -281,11 +298,12 @@ class PDBData(WebService):
     def set_search_molweight(self, weight_min, weight_max):
         '''Define lower and upper bound for molecular weight in a search query.
 
-        Args:
-            weight_min (float): Lowest molecular weight
-            weight_max (float): Highest molecular weight
-
-        Returns: None
+        Parameters
+        ----------
+        weight_min : float
+            Lowest molecular weight
+        weight_max : float
+            Highest molecular weight
 
         '''
         params = {}
@@ -299,9 +317,9 @@ class PDBData(WebService):
         '''Function to execute a configured search and retrieve the PDB IDs of
         the structures that satisfies search query.
 
-        Args: None
-
-        Returns: None
+        The PDB IDs can be accessed by the ``get_id`` method. The structure
+        data associated with the PDB IDs is obtained by iterating over the
+        class instantiation.
 
         '''
         # Construct a nested XML string that denotes a many criteria advanced
@@ -326,11 +344,15 @@ class PDBData(WebService):
     def _extract_pdb_id(self, data):
         '''Extract PDB IDs from the search output
 
-        Args:
-            data (string): String of data obtained from the PDB search.
+        Parameters
+        ----------
+        data : string
+            String of data obtained from the PDB search.
 
-        Returns:
-            ids (list): List of strings of PDB IDs.
+        Returns
+        -------
+        ids : list
+            List of strings of PDB IDs.
 
         '''
         return data.split('\n')[:-1]
@@ -338,12 +360,6 @@ class PDBData(WebService):
     def __iter__(self):
         '''Iterator for the class object which returns at each iteration a
         string in memory of the protein structure data in the PDB file format
-
-        Args: None
-
-        Returns: 
-            content_str (string): String of structure data formatted in the PDB
-                                  file format.
 
         '''
         for item_name in self._item_ids:
@@ -355,20 +371,8 @@ class PDBData(WebService):
 
             yield content_str
 
-    def __init__(self, save_to_disk=False, print_list_only=False):
-        '''Initialize the class object that retrieves structure data given a
-        search query
+    def __init__(self, save_to_disk=False):
 
-        Args: 
-            save_to_disk (bool): Parameter that sets if structure data should be saved
-                                 to disk in addition to being a string in
-                                 memory.
-            print_list_only (bool): Parameter that sets if any structure data should be
-                                    read or only the set of PDB IDs reported.
-
-        Returns: None
-
-        '''
         # Initialize parent class
         super().__init__(out_prefix='protein_', out_suffix='.xml')
 
@@ -380,7 +384,6 @@ class PDBData(WebService):
         # Parameters relevant to retrieving the structure data
         self.url_filebase = 'https://files.rcsb.org/download/'
         self.save_to_disk = save_to_disk 
-        self.print_list_only = print_list_only
 
 class PubMedData(WebService):
     '''Class to query the PubMed database available at
@@ -543,7 +546,7 @@ class PubMedData(WebService):
 
             yield content_str
 
-    def __init__(self, save_to_disk=False, print_list_only=False):
+    def __init__(self, save_to_disk=False):
         '''Initialize the class object that retrieves pubmed data given a
         search query
 
@@ -551,8 +554,6 @@ class PubMedData(WebService):
             save_to_disk (bool): Parameter that sets if raw pubmed search 
                                  data should be saved to disk in addition to being 
                                  a string in memory.
-            print_list_only (bool): Parameter that sets if any pubmed data should be
-                                    read or only the set of pubmed IDs reported.
 
         Returns: None
 
