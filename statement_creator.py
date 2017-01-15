@@ -1,7 +1,7 @@
 '''Bla bla
 
 '''
-from rootdata import PDBData
+from rawretrievers import PDBData
 from parsers import Parser
 from summaries import Summarizer
 from ensemble_stat import EnsembleStat

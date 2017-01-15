@@ -474,7 +474,7 @@ class Atom:
         self.atom_index = int(number)
         self.atom_mass = self._retrieve_property(element, 'mass')
 
-class PubMedEntry:
+class PubMedContainer:
     '''Bla bla
 
     '''

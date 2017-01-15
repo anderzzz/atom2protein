@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pprint
 
-from rootdata import PDBData, PubMedData
+from rawretrievers import PDBData, PubMedData
 from parsers import Parser
 from summaries import StructureSummarizer
 from presenter import Presenter, HowToViz

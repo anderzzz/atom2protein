@@ -3,8 +3,8 @@
 '''
 import xml.etree.ElementTree as etree
 
-from rootdata import PDBData, PubMedData
-from primitivedata import Atom, ProteinResidue, Residue, Chain, Structure
+from rawretrievers import PDBData, PubMedData
+from datacontainers import Atom, ProteinResidue, Residue, Chain, Structure
 
 class UnknownDataType(Exception):
     pass
@@ -335,38 +335,66 @@ class PubMedParser:
             raise UnknownFormatError('Unknown data format: %s' %(data_format_signifier))
 
 class Parser:
-    '''Class for a general data type parser, where the specific parser is
-    selected on basis of the data type. This is a simple 'wrapper' class to
-    enable general use.
+    '''Class to parse protein raw data and populate instance of relevant data
+    container.
+    
+    Class for a general data type parser, where the specific parser is
+    selected on basis of the data type. This is a factory class to
+    enable general use. A class instance returns a data container when called
+    with raw data as input argument..
+
+    Parameters
+    ----------
+    data_type, raw data object
+        The raw data object to be parsed. Can be any type.
+    args, tuple, optional
+        A tuple of arguments to pass to specific raw data parser.
+
+    Returns
+    -------
+    data_container, object
+        The data container object associated with the raw data type. The
+        specific content of the data container is populated from the raw data
+        passed as an argument to the class instance.
+
+    Notes
+    -----
+    The associations between raw data class and data container currently
+    implemented are:
+
+    +------------------+-----------------------+-------------------+
+    | Raw Data Class   | Data Container Class  | Parser Class      |
+    +==================+=======================+===================+
+    | PDBData          | StructureContainer    | PDBParser         |
+    +------------------+-----------------------+-------------------+
+    | PubMedData       | PubMedContainer       | PubMedParser      |
+    +------------------+-----------------------+-------------------+
+
+    Raises
+    ------
+    UnknownDataType
+        If class of input object is not associated with any specific parser.
 
     '''
     def __call__(self, data):
-        '''Parse data
+        '''Parse specific raw data and return data container.
 
-        Args: 
-            data: data to be parsed in any valid format
+        Parameters
+        ----------
+        data, raw data object
+            Raw data to be parsed in any valid format.
 
-        Returns:
-            object: data object with attributes populated in accordance with
-                    parsed data.
+        Returns
+        -------
+        object, data container object 
+            Data container object with attributes populated from the parsed 
+            raw data.
 
         '''
         return self.parser(data)
         
     def __init__(self, data_type, *args):
-        '''Initialize a general parser object.
 
-        Args:
-            data_type (object): The object of the data to be parsed.
-            args (tuple): Arguments to be passed to the specific parsers.
-
-        Returns: Parser object
-
-        Raises:
-            UnknownDataType: if class of given data object to be parsed is
-                             unknown.
-
-        '''
         if isinstance(data_type, PDBData):
             self.parser = PDBParser(*args)
         elif isinstance(data_type, PubMedData):

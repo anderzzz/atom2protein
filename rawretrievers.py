@@ -386,22 +386,49 @@ class PDBData(WebService):
         self.save_to_disk = save_to_disk 
 
 class PubMedData(WebService):
-    '''Class to query the PubMed database available at
-    http://www.ncbi.nlm.nih.gov/pubmed/
-    using advanced search queries. The class also retrieves the data associated
+    '''Class to query the PubMed database 
+    
+    Class to execute advanced search queries of the PubMed dataase. 
+    The class also retrieves the data associated
     with the queried publication identifiers in the JSON format.
 
-    Helpful documentation on the PubMed REST API is found at
-    http://www.ncbi.nlm.nih.gov/books/NBK25501/
+    Parameters
+    ----------
+    save_to_disk, bool, default False 
+        Parameter that sets if raw pubmed search 
+        data should be saved to disk in addition to being 
+        a string in memory.
+
+    Yields 
+    -------
+    content : string
+        The JSON raw data of the PubMed data, an element of the 
+        subset of PubMed entries that satisfy the search query.
+
+    Notes
+    -----
+    The typical workflow of this class is:
+
+    1. Initialize the class.
+    2. Execute the relevant ``set_search`` methods.
+    3. Execute the ``search`` method.
+    4. Iterate over the class instance to retrieve the raw data.
+
+    References
+    ----------
+
+    - The PubMed database is available at http://www.ncbi.nlm.nih.gov/pubmed
+    - Helpful documentation on the PubMed REST API is found at
+      http://www.ncbi.nlm.nih.gov/books/NBK25501/
 
     '''
     def set_search_journal(self, journal_name):
         '''Set the name of the journal for query.
 
-        Args:
-            journal_name (string): Name of journal. Whitespace allowed.
-
-        Returns: None
+        Parameters
+        ----------
+        journal_name, string 
+            Name of journal to include in query. Whitespace allowed.
 
         '''
         params = {}
@@ -411,11 +438,10 @@ class PubMedData(WebService):
     def set_search_abstract(self, title_and_abstract):
         '''Set condition on text in title or abstract for query.
 
-        Args:
-            title_and_abstract (string): Text to be present in title or
-                                         abstract. Whitespace allowed.
-
-        Returns: None
+        Parameters
+        ----------
+        title_and_abstract, string
+            Text to be present in title or abstract. Whitespace allowed.
 
         '''
         params = {}
@@ -425,11 +451,12 @@ class PubMedData(WebService):
     def set_search_publishdate(self, date_min, date_max):
         '''Set condition on publication date for query.
 
-        Args:
-            date_min (string): Earliest publication date, format YYYYMMDD
-            date_max (string): Most recent publication date, format YYYYMMDD
-
-        Returns: None
+        Parameters
+        ----------
+        date_min, string
+            Earliest publication date, format YYYYMMDD.
+        date_max, string
+            Most recent publication date, format YYYYMMDD
 
         '''
         params = {}
@@ -439,18 +466,23 @@ class PubMedData(WebService):
         self.uri_parameters.append(params)
 
     def set_retmax(self, retmax):
-        '''Bla bla
+        '''Set maximum entries to return per page from a query.
+
+        Parameters
+        ----------
+        retmax, int
+            Maximum entries per page from a query.
 
         '''
         self.retmax = str(retmax)
 
     def search(self):
-        '''Perform the query of the PubMed database as set above. The function
-        constructs the parametes to the GET call and sets the list of PMIDs.
+        '''Function to execute a configured search and retrieve the PubMed IDs 
+        of the entries that satisfy search query.
 
-        Args: None
-
-        Returns: None
+        The IDs can be accessed by the ``get_id`` method. The PubMed
+        data associated with the IDs is obtained by iterating over the
+        class instantiation.
 
         '''
         # Set required constant parameters
@@ -490,12 +522,16 @@ class PubMedData(WebService):
     def _plus_adjust(self, string2adjust):
         '''Replace intermediate white space in search terms with '+' signs.
 
-        Args:
-            string2adjust (string): string that can contain whitespace
+        Parameters
+        ----------
+        string2adjust, string
+            String that can contain whitespace
 
-        Returns:
-            plus_string (string): string that contains no whitespace and with
-                                  intermediate whitespace replaced with '+'. 
+        Returns
+        -------
+        plus_string, string
+            String that contains no whitespace and with intermediate 
+            whitespace replaced with '+'. 
 
         '''
         compact_string = string2adjust.strip()
@@ -507,11 +543,15 @@ class PubMedData(WebService):
         '''From the returned XML string of an advanced search of the PubMed,
         the PMIDs are retrieved.
 
-        Args:
-            xml_string (string): The XML string obtained from the PubMed query.
+        Parameters
+        ----------
+        xml_string, string
+            The XML string obtained from the PubMed query.
 
-        Returns:
-            ret_ids (list): List of strings of the PMIDs.
+        Returns
+        -------
+        ret_ids, list
+            List of strings of the PMIDs.
 
         '''
         root = etree.fromstring(xml_string)
@@ -526,11 +566,6 @@ class PubMedData(WebService):
     def __iter__(self):
         '''Iterator for the class object which returns at each iteration a
         string in memory of the detailed pubmed output 
-
-        Args: None
-
-        Returns: 
-            content_str (string): String of pubmed data.
 
         '''
         for item_id in self._item_ids:
@@ -547,17 +582,7 @@ class PubMedData(WebService):
             yield content_str
 
     def __init__(self, save_to_disk=False):
-        '''Initialize the class object that retrieves pubmed data given a
-        search query
 
-        Args: 
-            save_to_disk (bool): Parameter that sets if raw pubmed search 
-                                 data should be saved to disk in addition to being 
-                                 a string in memory.
-
-        Returns: None
-
-        '''
         # Initialize parent class
         super().__init__(out_prefix='pubmed_', out_suffix='.xml')
 

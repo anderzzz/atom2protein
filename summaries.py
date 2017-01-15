@@ -1,7 +1,7 @@
 '''Bla bla
 
 '''
-from primitivedata import Structure, PubMedEntry
+from datacontainers import Structure
 from calculators import StructureCalculator
 
 import pandas as pd
@@ -185,14 +185,4 @@ class StructureSummarizer:
                                 'rresidues_polarity' : rresidues_polarity,
                                 'bfactor_chain_stat' : bfactor_chain_stat,
                                 'bb_torsions' : bb_torsions}
-
-class PubMedSummarizer:
-    '''Bla bla
-
-    '''
-    def __init__(self):
-        '''Bla bla
-
-        '''
-        pass
 
