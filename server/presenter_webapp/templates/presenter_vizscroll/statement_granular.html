@@ -1,0 +1,23 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>Protein Data Viz Page</title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="{% static 'css/simple.css' %}">
+    </head>
+    <body>
+        <div>
+            <h1><a href="/">Protein Data Viz Posts</a></h1>
+        </div>
+
+        {% for post in posts %}
+            <div>
+                <p>published: {{ post.created }} </p>
+                <h1><a href="">{{ post.created_by }}</a></h1>
+                <p>{{ post.viz_category|linebreaksbr }}</p>
+            </div>
+        {% endfor %}
+    </body>
+</html>
+

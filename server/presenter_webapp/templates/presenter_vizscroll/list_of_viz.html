@@ -1,0 +1,46 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Protein Data Viz Page</title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="{% static 'css/simple.css' %}">
+        <link rel="stylesheet" type="text/css" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.css">
+        <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.js"></script>
+        <script type="text/javascript">
+            Bokeh.set_log_level("info");
+        </script>
+        <style>
+          html {
+            width: 100%;
+            height: 100%;
+          }
+          body {
+            width: 90%;
+            height: 100%;
+            margin: auto;
+          }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1><a href="/">Protein Data Viz Posts</a></h1>
+        </div>
+
+        {% for post in posts %}
+            <div>
+                <h1><a href="">Hello There</a></h1>
+                <p>published: {{ post.created_time }} </p>
+                {% autoescape on %}
+                {{ post.div|safe }} 
+                {% endautoescape %}
+                {% autoescape on %}
+                {{ post.script|safe }}
+                {% endautoescape %}
+                <p>type: {{post.entry_data_text}}</p>
+            </div>
+        {% endfor %}
+    </body>
+</html>
+
