@@ -3,12 +3,13 @@
 '''
 from rawretrievers import PDBData
 from parsers import Parser
-from summaries import Summarizer
-from ensemble_stat import EnsembleStat
+from summaries import StructureSummarizer
+from ensemble_makers import EnsembleMaker
 
 from collections import namedtuple
+import json
 
-class StatementCreator:
+class Launcher:
     '''Bla bla
 
     '''
@@ -36,10 +37,13 @@ class StatementCreator:
             ensemble_stat = EnsembleStat(make_graphics=True, **self.stat_init[k_run])
             ensemble_stat(summary_collection)
         
-    def __init__(self):
+    def __init__(self, method_chain):
         '''Bla bla
 
         '''
+        print (method_chain)
+        print (json.loads(method_chain))
+        raise TypeError
         self.root = [] 
         self.search_stream = []
         self.summarize_init = []
