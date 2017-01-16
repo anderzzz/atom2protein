@@ -1,8 +1,8 @@
 '''Bla bla
 
 '''
-from datacontainers import Structure
-from calculators import StructureCalculator
+from proteininfo.datacontainers import Structure
+from proteininfo.calculators import StructureCalculator
 
 import pandas as pd
 from collections import namedtuple

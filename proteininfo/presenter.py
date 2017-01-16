@@ -1,10 +1,10 @@
 '''Bla bla
 
 '''
-from visualizers import Visualizer
-from summaries import StructureSummarizer, PubMedSummarizer
-from ensemble_makers import EnsembleMaker
-from _version import __version__
+from proteininfo.visualizers import Visualizer
+from proteininfo.summaries import StructureSummarizer
+from proteininfo.ensemble_makers import EnsembleMaker
+from proteininfo._version import __version__
 
 import inspect
 import sqlite3
@@ -251,8 +251,8 @@ class Presenter:
             if self.howtoviz is None:
                 if all(isinstance(s, StructureSummarizer) for s in summary_object):
                     self.howtoviz = HowToViz(default='summary structure')
-                elif all(isinstance(s, PubMedSummarizer) for s in summary_object):
-                    self.howtoviz = HowToViz(default='summary pubmed')
+                #elif all(isinstance(s, PubMedSummarizer) for s in summary_object):
+                #    self.howtoviz = HowToViz(default='summary pubmed')
                 else:
                     raise TypeError("Summary contains objects without a presenter class")
         else:
@@ -261,8 +261,8 @@ class Presenter:
             if self.howtoviz is None:
                 if isinstance(summary_object, StructureSummarizer):
                     self.howtoviz = HowToViz(default='single structure')
-                elif isinstance(summary_object, PubMedSummarizer):
-                    self.howtoviz = HowToViz(default='single pubmed')
+                #elif isinstance(summary_object, PubMedSummarizer):
+                #    self.howtoviz = HowToViz(default='single pubmed')
                 else:
                     raise TypeError("Summary is of type without a presenter class")
 

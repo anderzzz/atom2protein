@@ -3,12 +3,13 @@ import time
 import json
 import numpy as np
 import pprint
+import os
 
-from rawretrievers import PDBData, PubMedData
-from parsers import Parser
-from summaries import StructureSummarizer
-from presenter import Presenter, HowToViz
-from database import DBHandler
+from proteininfo.rawretrievers import PDBData, PubMedData
+from proteininfo.parsers import Parser
+from proteininfo.summaries import StructureSummarizer
+from proteininfo.presenter import Presenter, HowToViz
+from proteininfo.database import DBHandler
 
 def search_pdb():
     pdb_root = PDBData(save_to_disk=True)
@@ -40,8 +41,8 @@ def main(args):
 
     data_parser = Parser(PDBData(), 'xml_file')
 
-    path = '/home/anderzzz/ideas/protein/'
-    db_handler = DBHandler('django', path + 'viz_output/', path + 'vizout.db',
+    path = os.getcwd() 
+    db_handler = DBHandler('django', path + '/viz_output/', path + 'vizout.db',
                            table_name='presenter_files',
                            headers=['created_by','version',
                                  'created_time','id_label','entry_data_type',
@@ -53,7 +54,7 @@ def main(args):
 
     collector = []
     for pdb_file in pdb_files:
-        structure = data_parser(path + pdb_file)
+        structure = data_parser(path + '/' + pdb_file)
         print (structure.label)
 
         summarizer = StructureSummarizer(structure.label)

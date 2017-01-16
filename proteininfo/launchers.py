@@ -1,10 +1,10 @@
 '''Bla bla
 
 '''
-from rawretrievers import PDBData
-from parsers import Parser
-from summaries import StructureSummarizer
-from ensemble_makers import EnsembleMaker
+from proteininfo.rawretrievers import PDBData
+from proteininfo.parsers import Parser
+from proteininfo.summaries import StructureSummarizer
+from proteininfo.ensemble_makers import EnsembleMaker
 
 from collections import namedtuple
 import json

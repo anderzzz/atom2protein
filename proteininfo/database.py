@@ -1,7 +1,8 @@
 '''Bla bla
 
 '''
-from _version import __version__
+from proteininfo._version import __version__
+
 import django
 django.setup()
 import server.presenter_webapp.models
