@@ -139,6 +139,28 @@ class AllPosts(View):
         context = {'posts' : postables}
         return HttpResponse(template.render(context, request)) 
 
+class SourcePosts(View):
+    def get(self, request, pk, format=None):
+        postables = []
+        presenter_model_instances = PresenterDataViz.objects.filter(data_source__id=pk)
+        for model in presenter_model_instances:
+            d_out = {}
+
+            data_file_root = model.file_path + '/' + model.file_namespace
+            with open(data_file_root + '.html_div') as fin:
+                d_out['div'] = fin.read()
+            with open(data_file_root + '.js') as fin:
+                d_out['script'] = fin.read()
+
+            d_out['created_time'] = str(model.created_time)
+            d_out['entry_data_text'] = model.entry_data_type
+
+            postables.append(d_out)
+
+        template = loader.get_template('presenter_vizscroll/list_of_viz.html')
+        context = {'posts' : postables}
+        return HttpResponse(template.render(context, request)) 
+
 def post_simple(request):
     if request.method == 'GET':
         form = RetrieverForm()
@@ -151,6 +173,6 @@ def post_simple(request):
             json_data = JSONRenderer().render(serializer.data).decode("utf-8")
             statement_creator = Launcher(json_data)
             statement_creator.launch()
-            return HttpResponseRedirect('/retriever')
+            return HttpResponseRedirect('/sourceposts/' + str(retriever_cmd.id))
 
     return render(request, 'retriever/simple.html', {'form': form})
