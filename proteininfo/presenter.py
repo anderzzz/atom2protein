@@ -185,7 +185,8 @@ class Presenter:
                 data = (self.summary_object.label, entry_type, viz_method,
                         '', entry.verbose, viz.get_descr(viz_method),
                         self.file_path, namespace)
-                self.db_entry(data, 'Presenter.produce_visualization')
+                self.db_entry(data, 'Presenter.produce_visualization',
+                                    self.search_id)
 
     def _validate_subset(self, summary_obj, id_subset, type_subset):
         '''Validate that any specifically enumerated summary IDs or entry types
@@ -243,7 +244,8 @@ class Presenter:
 
     def __init__(self, summary_object, db_handler,
                  howtoviz=None, ensemble_operation='join',
-                 id_subset=None, data_type_subset=None):
+                 id_subset=None, data_type_subset=None,
+                 search_id=None):
         '''Bla bla
 
         '''
@@ -277,4 +279,5 @@ class Presenter:
         self.summary_object = self.ensemble_maker(summary_object)
 
         self.db_entry = db_handler.make_db_entry
+        self.search_id = search_id
 

@@ -5,7 +5,7 @@ from proteininfo._version import __version__
 
 import django
 django.setup()
-import server.presenter_webapp.models
+from server.presenter_webapp.models import PresenterDataViz, RetrieverStructure
 
 import sqlite3
 import datetime
@@ -46,17 +46,20 @@ class DBHandler:
         c.execute("INSERT INTO %s VALUES (%s)" %(self.table_name, out_row_str))
         self.conn.commit()
 
-    def _django_entry(self, dynamic_entry, who_entered):
+    def _django_entry(self, dynamic_entry, who_entered, source_id):
         '''Bla bla
 
         '''
         out_row_data = self._entry_metadata(who_entered)
         out_row_data += dynamic_entry
-        out_row_key = ['created_by','created_by_version','created_time','id_label',
+        out_row_data += [RetrieverStructure.objects.get(pk=int(source_id))]
+        out_row_key = ['created_by','created_by_version','created_time',
+                       'id_label',
                        'entry_data_type','viz_method','id_text','entry_data_text',
-                       'viz_text','file_path','file_namespace']
+                       'viz_text','file_path','file_namespace',
+                       'data_source']
         fields = dict([(x, y) for x, y in zip(out_row_key, out_row_data)])
-        p = server.presenter_webapp.models.PresenterDataViz(**fields)
+        p = PresenterDataViz(**fields)
         p.save()
 
     def close(self):

@@ -33,7 +33,8 @@ class Launcher:
                 func = getattr(summarizer, summary_method)
                 func(container)
             summary_collection.append(summarizer)
-            presenter = Presenter(summarizer, self.db_handler)
+            presenter = Presenter(summarizer, self.db_handler,
+                                  search_id=self.id_of_search)
             presenter.produce_visualization(output_format='javascript')
 
     def __init__(self, method_chain):
