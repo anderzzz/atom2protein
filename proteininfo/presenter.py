@@ -67,7 +67,12 @@ class HowToViz:
                                     kwargs.
 
         '''
-        return self._container[key]
+        try:
+            ret = self._container[key]
+        except KeyError:
+            raise KeyError('No visualization associated with property %s' %(key))
+
+        return ret
 
     def __init__(self, default=None):
         '''Initialize class that handles the concern of which visualization
@@ -107,6 +112,9 @@ class HowToViz:
                      {'x_axis' : 'chain', 'y_axis' : 'residue count',
                       'stack' : 'property'})
             self.add('nresidues_polarity', 'stacked_bars',
+                     {'x_axis' : 'chain', 'y_axis' : 'residue count',
+                      'stack' : 'property'})
+            self.add('rresidues_polarity', 'stacked_bars',
                      {'x_axis' : 'chain', 'y_axis' : 'residue count',
                       'stack' : 'property'})
 

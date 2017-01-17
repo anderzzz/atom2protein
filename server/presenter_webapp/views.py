@@ -16,7 +16,7 @@ from .forms import RetrieverForm
 from server.presenter_webapp.models import RetrieverStructure 
 import sys
 sys.path.append('/home/anderzzz/ideas/protein')
-from launchers import Launcher
+from proteininfo.launchers import Launcher
 
 class PresenterDataVizList(APIView):
     '''List all protein data visualization, or create new one
@@ -145,21 +145,12 @@ def post_simple(request):
     else:
         form = RetrieverForm(request.POST)
         if form.is_valid():
-            title = form.cleaned_data['title']
-            resolution = form.cleaned_data['resolution_min']
-            retriever_cmd = RetrieverStructure.objects.create(title=title,
-                                                 resolution_min=resolution,
-                                                 resolution_max=resolution)
+            retriever_cmd = RetrieverStructure.objects.create(**form.cleaned_data)
             retriever_cmd.save()
             serializer = RetrieverStructureSerializer(retriever_cmd)
-            print (serializer.data)
             json_data = JSONRenderer().render(serializer.data).decode("utf-8")
-            print (json_data)
             statement_creator = Launcher(json_data)
-            # My thinking is to serialize model, send to a "statement creator"
-            # which parses the JSON and launches a calculation, returns the new
-            # visualization entry ID for loading.
-            xx=proteinmeta.launcher(serializer.data)
+            statement_creator.launch()
             return HttpResponseRedirect('/retriever')
 
     return render(request, 'retriever/simple.html', {'form': form})

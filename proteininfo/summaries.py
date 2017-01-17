@@ -173,11 +173,11 @@ class StructureSummarizer:
 
     def __init__(self, label, nresidues=None, nresidues_polarity=None,
                  rresidues_polarity=None, bfactor_chain_stat=None,
-                 bb_torsions=None, **kwargs):
+                 bb_torsions=None, kwargs_to_calc={}):
         '''Bla bla
 
         '''
-        self.calculator = StructureCalculator(**kwargs)
+        self.calculator = StructureCalculator(**kwargs_to_calc)
 
         self.label = label 
         self.entry_collector = {'nresidues' : nresidues,
@@ -186,3 +186,13 @@ class StructureSummarizer:
                                 'bfactor_chain_stat' : bfactor_chain_stat,
                                 'bb_torsions' : bb_torsions}
 
+def create_summarizer_for(container, kwargs_to_sum={}):
+    '''Bla bla
+
+    '''
+    if isinstance(container, Structure):
+        ret = StructureSummarizer(container.label, **kwargs_to_sum)
+    else:
+        raise NotImplementedError("Only structures so far")
+
+    return ret

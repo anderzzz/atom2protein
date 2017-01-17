@@ -242,7 +242,8 @@ class ProteinResidue(Residue):
              ('gly', 'g'), ('asp', 'd'), ('asn', 'n'), ('arg', 'r'),
              ('lys', 'k'), ('pro', 'p'), ('leu', 'l'), ('ile', 'i'),
              ('val', 'v'), ('thr', 't'), ('ser', 's'), ('tyr', 'y'),
-             ('phe', 'f'), ('trp', 'w'), ('met', 'm'), ('his', 'h')]
+             ('phe', 'f'), ('trp', 'w'), ('met', 'm'), ('his', 'h'),
+             ('pca', 'x')]
 
     RESIDUE_DATA = {'ala' : {'polarity' : 'hydrophobic'},
                     'asp' : {'polarity' : 'negative charge'},
@@ -263,7 +264,8 @@ class ProteinResidue(Residue):
                     'phe' : {'polarity' : 'hydrophobic'},
                     'trp' : {'polarity' : 'hydrophobic'},
                     'met' : {'polarity' : 'hydrophobic'},
-                    'his' : {'polarity' : 'hydrophilic'}}
+                    'his' : {'polarity' : 'hydrophilic'},
+                    'pca' : {'polarity' : 'hydrophilic'}}
 
     SS_DATA = {'helix' : {}, 'sheet' : {}, 'loop' : {}}
 

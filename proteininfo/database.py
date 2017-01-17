@@ -66,7 +66,7 @@ class DBHandler:
         self.conn.close()
 
     def __init__(self, db_method_name, static_file_path, db_file_path, 
-                 table_name=None, headers=None, django_model=None):
+                 table_name=None, headers=None):
         '''Bla bla
 
         '''
