@@ -1,11 +1,11 @@
 '''Bla bla
 
 '''
-from proteininfo.rawretrievers import PDBData
-from proteininfo.parsers import Parser
-from proteininfo.summaries import create_summarizer_for
-from proteininfo.presenter import Presenter
-from proteininfo.database import DBHandler
+from informatics.rawretrievers import PDBData
+from informatics.parsers import Parser
+from informatics.summaries import create_summarizer_for
+from informatics.presenter import Presenter
+from informatics.database import DBHandler
 
 from collections import namedtuple
 import json

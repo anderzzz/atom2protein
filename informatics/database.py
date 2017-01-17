@@ -1,7 +1,7 @@
 '''Bla bla
 
 '''
-from proteininfo._version import __version__
+from informatics._version import __version__
 
 import django
 django.setup()

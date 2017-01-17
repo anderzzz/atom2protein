@@ -1,10 +1,10 @@
 '''Bla bla
 
 '''
-from proteininfo.visualizers import Visualizer
-from proteininfo.summaries import StructureSummarizer
-from proteininfo.ensemble_makers import EnsembleMaker
-from proteininfo._version import __version__
+from informatics.visualizers import Visualizer
+from informatics.summaries import StructureSummarizer
+from informatics.ensemble_makers import EnsembleMaker
+from informatics._version import __version__
 
 import inspect
 import sqlite3

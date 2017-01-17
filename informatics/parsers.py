@@ -3,8 +3,8 @@
 '''
 import xml.etree.ElementTree as etree
 
-from proteininfo.rawretrievers import PDBData, PubMedData
-from proteininfo.datacontainers import Atom, ProteinResidue, Residue, Chain, Structure
+from informatics.rawretrievers import PDBData, PubMedData
+from informatics.datacontainers import Atom, ProteinResidue, Residue, Chain, Structure
 
 class UnknownDataType(Exception):
     pass

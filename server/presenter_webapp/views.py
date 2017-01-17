@@ -16,7 +16,7 @@ from .forms import RetrieverForm
 from server.presenter_webapp.models import RetrieverStructure 
 import sys
 sys.path.append('/home/anderzzz/ideas/protein')
-from proteininfo.launchers import Launcher
+from informatics.launchers import Launcher
 
 class PresenterDataVizList(APIView):
     '''List all protein data visualization, or create new one
