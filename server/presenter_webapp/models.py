@@ -20,6 +20,12 @@ class RetrieverStructure(models.Model):
     molweight_min = models.FloatField(blank=True, null=True)
     molweight_max = models.FloatField(blank=True, null=True)
 
+    nresidues = models.BooleanField(default=False)
+    rresidues_polarity = models.BooleanField(default=False)
+    bb_torsions = models.BooleanField(default=False)
+
+    collective_viz = models.BooleanField(default=True)
+
 class PresenterDataViz(models.Model):
     '''Django model for the data visualization
 

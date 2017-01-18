@@ -1,6 +1,8 @@
 from server.presenter_webapp.models import PresenterDataViz
 from server.presenter_webapp.serializers import PresenterDataVizSerializer
 from server.presenter_webapp.serializers import RetrieverStructureSerializer
+from server.presenter_webapp.serializers import RetrieverStructureSerializer2
+from server.presenter_webapp.serializers import RetrieverStructureSerializer3
 from django.http import Http404
 from django.template import loader
 from django.conf import settings
@@ -12,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 
-from .forms import RetrieverForm 
+from .forms import RetrieverForm, RetrieverForm2, RetrieverForm3 
 from server.presenter_webapp.models import RetrieverStructure 
 import sys
 sys.path.append('/home/anderzzz/ideas/protein')
@@ -164,15 +166,37 @@ class SourcePosts(View):
 def post_simple(request):
     if request.method == 'GET':
         form = RetrieverForm()
+        form2 = RetrieverForm2()
+        form3 = RetrieverForm3()
     else:
         form = RetrieverForm(request.POST)
-        if form.is_valid():
-            retriever_cmd = RetrieverStructure.objects.create(**form.cleaned_data)
+        form2 = RetrieverForm2(request.POST)
+        form3 = RetrieverForm3(request.POST)
+        if form.is_valid() and form2.is_valid() and form3.is_valid():
+            search_dict = form.cleaned_data
+            sum_dict = form2.cleaned_data
+            present_dict = form3.cleaned_data
+            total_dict = search_dict.copy()
+            total_dict.update(present_dict)
+            total_dict.update(sum_dict)
+            retriever_cmd = RetrieverStructure.objects.create(**total_dict)
             retriever_cmd.save()
             serializer = RetrieverStructureSerializer(retriever_cmd)
-            json_data = JSONRenderer().render(serializer.data).decode("utf-8")
+            serializer2 = RetrieverStructureSerializer2(retriever_cmd)
+            serializer3 = RetrieverStructureSerializer3(retriever_cmd)
+            rr = serializer.data
+            rr2 = serializer2.data
+            rr3 = serializer3.data
+            pp = {'rawdata_type' : 'protein_structure', 
+                  'search_instructions' : rr,
+                  'summary_instructions' : rr2,
+                  'presentation_instructions' : rr3}
+            json_data = JSONRenderer().render(pp).decode("utf-8")
+            print (json_data)
             statement_creator = Launcher(json_data)
             statement_creator.launch()
             return HttpResponseRedirect('/sourceposts/' + str(retriever_cmd.id))
 
-    return render(request, 'retriever/simple.html', {'form': form})
+    return render(request, 'retriever/simple.html', {'form': form, 
+                                                     'form2': form2,
+                                                     'form3': form3})

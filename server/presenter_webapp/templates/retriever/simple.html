@@ -1,6 +1,8 @@
 <h1>New Retrieval</h1>
 <form method="POST" action="/retriever/">{% csrf_token %}
     {{ form.as_p }}
+    {{ form2.as_p }}
+    {{ form3.as_p }}
 <input type='submit' value='Submit'>
 </form>
 

@@ -18,4 +18,22 @@ class RetrieverStructureSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = RetrieverStructure
-        fields = '__all__'
+        fields = ('id', 'pubmedid', 'description', 'resolution_min',
+        'resolution_max', 'title', 'depositdate_min', 'depositdate_max',
+        'molweight_min', 'molweight_max')
+
+class RetrieverStructureSerializer2(serializers.ModelSerializer):
+    '''Bla bla
+
+    '''
+    class Meta:
+        model = RetrieverStructure
+        fields = ('nresidues', 'rresidues_polarity', 'bb_torsions')
+
+class RetrieverStructureSerializer3(serializers.ModelSerializer):
+    '''Bla bla
+
+    '''
+    class Meta:
+        model = RetrieverStructure
+        fields = ('collective_viz',)
