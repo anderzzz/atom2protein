@@ -351,7 +351,7 @@ class ProteinResidue(Residue):
     includes:
     * ``polarity`` : classification of each residue in terms of polarity.
     * ``chemical`` : classification of each residue in terms of chemical
-        structure of side-chain.
+      structure of side-chain.
 
     '''
 
