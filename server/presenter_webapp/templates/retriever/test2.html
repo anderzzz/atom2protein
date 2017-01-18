@@ -1,0 +1,50 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Protein Search and Analysis</title>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="{% static 'css/simple.css' %}">
+        <link rel="stylesheet" href="{% static 'css/check_box.css' %}">
+        <style>
+          html {
+            width: 100%;
+            height: 100%;
+          }
+          body {
+            width: 90%;
+            height: 100%;
+            margin: auto;
+          }
+        </style>
+    </head>
+    <body>
+
+    <h1>Protein Structure Informatics</h1>
+    <form method="POST" action="/retriever/">{% csrf_token %}
+        <h4>Structure Search Parameters</h4>
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <h4>Structure Properties</h4>
+        {% for field in form2 %}
+            <div class="fieldWrapper">
+                {{ field.label }}
+                <div class="material-switch pull-right">
+                    <input id="{{ field.id_for_label }}" name="{{ field.html_name }}" type="checkbox"></input>
+                    <label for="{{ field.id_for_label }}" class="label-primary"></label>
+                </div>
+                <br>
+            </div>
+        {% endfor %}
+        <h4>Presentation Properties</h4>
+        <div class="form-group">
+            {{ form3.as_p }}
+        </div>
+        <input type='submit' value='Submit'>
+    </form>
+
+    </body>
+</html>
+

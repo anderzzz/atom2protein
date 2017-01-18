@@ -197,6 +197,6 @@ def post_simple(request):
             statement_creator.launch()
             return HttpResponseRedirect('/sourceposts/' + str(retriever_cmd.id))
 
-    return render(request, 'retriever/simple.html', {'form': form, 
-                                                     'form2': form2,
-                                                     'form3': form3})
+    return render(request, 'retriever/test2.html', {'form': form, 
+                                                    'form2': form2,
+                                                    'form3': form3})
