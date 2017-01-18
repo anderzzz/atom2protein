@@ -1,33 +1,45 @@
-'''Bla bla
+'''Module that defines all internal data objects, typically populated by a
+parser applied to raw data.
 
 '''
-import itertools
-
 class PMIDResetError(Exception):
-    pass
-
-class LevelError(Exception):
     pass
 
 class StructureContainer:
     '''Class to define common methods and attributes for any structure
-    container, that is anything but the atomic structure object. The class
-    emulates a dictionary in how child elements are retrieved, while it
-    emulates a set in how child emlements are added. The reason for this
-    separation is that the key is not arbitrary, but contained in the child
-    object label.
+    container, that is anything but the atomic structure object. 
+    
+    The class emulates a dictionary in how child elements are retrieved, 
+    while it emulates a set in how child emlements are added. The reason 
+    for this separation is that the key is not arbitrary, but contained 
+    in the child object label.
+
+    Parameters
+    ----------
+    label : string 
+        Label of the object. Must be unique within any set of objects 
+        added to a parent structure object.
+
+    Notes
+    -----
+    Child objects of a structure class instance can be accessed via the string 
+    key of the child object.
+
+    Like a dictionary the child objects can be iterated over. 
 
     '''
     def add(self, child_add):
-        '''Method to add structure child object to the structure container. Can
+        '''Method to add structure child object to the structure container. 
+        
+        The child object that is added can
         be another structure container object or an atomic structure object. If
         an object with the same label is found in the container, it is replaced
         with the new child object.
 
-        Args:
-            child_add (object): structure child object to add.
-
-        Returns: None
+        Parameters
+        ----------
+        child_add : object 
+            Structure child object to add.
 
         '''
         for index, child_object in enumerate(self.child_objects):
@@ -40,38 +52,52 @@ class StructureContainer:
     def keys(self):
         '''Method to obtain the unique keys to access the child objects.
 
-        Args: None
-
-        Returns:
-            keys (set): Set of strings of all keys to child structure objects.
+        Returns
+        -------
+        keys : set
+            Set of strings of all keys to child structure objects.
 
         '''
         return set([child_object.label for child_object in self.child_objects])
 
     def items(self):
-        '''Method to obtain iterator over (key, child_object).
+        '''Obtain iterator over (key, child_object).
 
-        Args: None
-
-        Returns: key_value (iterator): Iterator for tuple of string key and
-                                       associated structure child object.
+        Yields
+        ------
+        key_value : tuple 
+            Tuple of string key and associated structure child object.
 
         '''
         for child_object in self.child_objects:
             yield (child_object.label, child_object)
 
     def unravel(self, level):
-        '''Method to unravel a hierarchy of a structure container at a set
-        level. Level equal to one is the same has the method items().
+        '''Unravel a hierarchy of a structure container at a set
+        level. 
+        
+        The recursive unraveling of the structure object into key value 
+        pairs where the higher the level, the further down the hierarchy the
+        unraveling goes. Level equal to one is the same has the method
+        ``items``.
 
-        Args:
-            level (int): The number of levels to unravel of the container.
+        Parameters
+        ----------
+        level : int
+            The number of levels to unravel of the container.
 
-        Returns:
-            objects (list): List of tuples, where the first element of tuple is
-                            the combined structure label, where the second
-                            element of tuple is the unravelled structure
-                            object.
+        Returns
+        -------
+        objects : list 
+            List of tuples, where the first element of tuple is
+            the combined structure element label, where the second
+            element of tuple is the unravelled structure object.
+
+        Notes
+        -----
+        The keys for the unravelled key-value pair are tuples of an increasing
+        length with increasing value of ``level``. Each element is a label of a
+        structure child object.
 
         '''
         def recurse(current, keys, dep):
@@ -92,15 +118,22 @@ class StructureContainer:
     def __getitem__(self, key):
         '''Method to obtain structure child object by string key.
 
-        Args:
-            key (string): String key to structure child object.
+        Parameters
+        ----------
+        key : string
+            String key to structure child object.
 
-        Returns:
-            child_object (object): Child object associated with given key.
+        Returns
+        -------
+        child_object : object
+            Child object associated with given key.
 
-        Raises:
-            TypeError: If a non-string key given.
-            KeyError: If the key is not found.
+        Raises
+        ------
+        TypeError 
+            If a non-string key given.
+        KeyError
+            If the key is not found.
 
         '''
         if not isinstance(key, str):
@@ -116,62 +149,73 @@ class StructureContainer:
     def __iter__(self):
         '''Method to obtain iterator over keys.
 
-        Args: None
-
-        Returns:
-            labels (iterator): Iterator over the string keys to each structure
-                               child object.
+        Yields
+        ------
+        labels : object
+            The string keys to each structure child object.
 
         '''
         for child_object in self.child_objects:
             yield child_object.label
 
     def __init__(self, label):
-        '''Method to initialize the general structure container object.
-
-        Args:
-            label (string): Label of the object. Must be unique within any set
-                            of objects added to a parent structure object.
-
-        '''
         self.label = label.lower()
         self.child_objects = []
 
 class Structure(StructureContainer):
-    '''Full protein structure container object. Children are typically one or
-    more Chain structure objects.
+    '''Full protein structure container object. 
+    
+    Inherits from the StructureContainer class, where child objects typically
+    are instances of Chain class.
+
+    Parameters
+    ----------
+    label : string, default "no label"
+        Arbitrary but unique label of structure, preferably PDB ID.
+    experimental_data : object, optional
+        Experiment object to characterize how structure data was experimentally
+        obtained.
 
     '''
     def set_experiment(self, experiment):
-        '''Bla bla
+        '''Set the experiment attribute of the structure.
+
+        Parameters
+        ----------
+        experiment : object
+            The Experiment object with data on how structure was experimentally
+            obtained.
 
         '''
         self.experimental_data = experiment
 
-    def __init__(self, label='dummy', experimental_data=None):
-        '''Method to initialize the full protein structure object.
-
-        Args:
-            label (string): Name of full protein structure.
-            experimental_data (object, optional): Experiment object to characterize 
-                                        how the structure was obtained.
-
-        '''
+    def __init__(self, label='no label', experimental_data=None):
         super().__init__(label)
         self.experimental_data = experimental_data
 
 class Chain(StructureContainer):
-    '''Chain structure container object. Children are typically
-    one or more Residue or ProteinResidue objects.
+    '''Chain structure container object. 
+    
+    Children are typically one or more Residue or ProteinResidue objects. These
+    are populated typically by a parser applied to raw data.
+
+    Parameters
+    ----------
+    label : string
+        String label for chain object, must be unique within its super
+        structure container.
+    bio_content : object, optional
+        Object to define the biological content of the chain (not implemented).
 
     '''
     def get_backbone(self):
         '''Method to return a list of backbone atoms in the chain.
 
-        Args: None.
-
-        Returns:
-            backbone (list):
+        Returns
+        -------
+        backbone : list
+            List of Atom objects that correspond to backbone atoms in the
+            chain.
 
         '''
         container = []
@@ -182,19 +226,27 @@ class Chain(StructureContainer):
         return container
 
     def __init__(self, label, bio_content=None):
-        '''Method to initialize the chain structure object.
-
-        Args:
-            label (string): Name of chain.
-            bio_content (object, optional): TBD.
-
-        '''
         super().__init__(label)
         self.bio_content = bio_content
 
 class Residue(StructureContainer):
-    '''Residue structure container object. Children are typically one or more
-    atomic structure objects.
+    '''Residue structure container object. 
+    
+    Children are typically one or more atomic structure objects. This is the
+    general residue class, which is expanded and modified by the
+    ``ProteinResidue`` class.
+
+    Parameters
+    ----------
+    name : string 
+        Three letter code for the type of residue.
+    residue_id : string
+        The residue id, which together with ``residue_insert`` forms a unique
+        identifier for within the Chain.
+    residue_insert : string, optional
+        The residue insertion code in addition to the residue id.
+    description, string, optional
+        A string description of the residue.
 
     '''
     def is_protein_residue(self):
@@ -207,35 +259,37 @@ class Residue(StructureContainer):
         return []
 
     def __str__(self):
-        '''How to present residue object as string
+        '''How to present residue object as string.
 
-        Args: None
-
-        Returns:
-            string_repr (string): String representation of residue.
+        Returns
+        -------
+        string_repr : string
+            String representation of residue.
 
         '''
         return 'Residue type %s of ID %s' %(self.residue_name_3lc, self.label)
 
     def __init__(self, name, residue_id, residue_insert='', description=None):
-        '''Method to initialize the residue structure object.
-
-        Args:
-            name (string): Three letter code for the type of residue.
-            residue_id (string): The residue id.
-            residue_insert (string, optional): The residue insertion code in addition to
-                                     the residue id.
-            description (string, optional): A string description of the
-                                  residue.
-
-        '''
         super().__init__(residue_id + residue_insert)
         self.description = description
         self.residue_name_3lc = name.lower()
 
 class ProteinResidue(Residue):
-    '''Protein residue structure container object. Inherits the general Residue
-    class. Children are typically one or more atomic structure objects.
+    '''Protein residue structure container object. 
+    
+    Inherits the general Residue class. Children are typically one or more 
+    atomic structure objects. The class contains protein residue constants.
+
+    Parameters
+    ----------
+    name_3lc : string
+        Three letter code for the protein residue type.
+    residue_id : string
+        Residue id within the chain.
+    residue_insert : string, optional
+        Residue insertion code.
+    secondary_structure : string, optional
+        Secondary structure the protein residue part of.
 
     '''
     CODES = [('ala', 'a'), ('cys', 'c'), ('glu', 'e'), ('gln', 'q'), 
@@ -244,28 +298,62 @@ class ProteinResidue(Residue):
              ('val', 'v'), ('thr', 't'), ('ser', 's'), ('tyr', 'y'),
              ('phe', 'f'), ('trp', 'w'), ('met', 'm'), ('his', 'h'),
              ('pca', 'x')]
+    '''list: List of tuples that associate one-letter and three-letter codes
+    for protein residue.
 
-    RESIDUE_DATA = {'ala' : {'polarity' : 'hydrophobic'},
-                    'asp' : {'polarity' : 'negative charge'},
-                    'asn' : {'polarity' : 'hydrophilic'},
-                    'arg' : {'polarity' : 'positive charge'},
-                    'cys' : {'polarity' : 'hydrophobic'},
-                    'gly' : {'polarity' : 'hydrophilic'},
-                    'gln' : {'polarity' : 'hydrophilic'},
-                    'glu' : {'polarity' : 'negative charge'},
-                    'lys' : {'polarity' : 'positive charge'},
-                    'pro' : {'polarity' : 'hydrophobic'},
-                    'leu' : {'polarity' : 'hydrophobic'},
-                    'ile' : {'polarity' : 'hydrophobic'},
-                    'val' : {'polarity' : 'hydrophobic'},
-                    'thr' : {'polarity' : 'hydrophilic'},
-                    'ser' : {'polarity' : 'hydrophilic'},
-                    'tyr' : {'polarity' : 'hydrophobic'},
-                    'phe' : {'polarity' : 'hydrophobic'},
-                    'trp' : {'polarity' : 'hydrophobic'},
-                    'met' : {'polarity' : 'hydrophobic'},
-                    'his' : {'polarity' : 'hydrophilic'},
-                    'pca' : {'polarity' : 'hydrophilic'}}
+    '''
+
+    RESIDUE_DATA = {'ala' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aliphatic'},
+                    'asp' : {'polarity' : 'negative charge',
+                             'chemical' : 'carboxylic acid'},
+                    'asn' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'amide'},
+                    'arg' : {'polarity' : 'positive charge',
+                             'chemical' : 'guanidine'},
+                    'cys' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'thiol'},
+                    'gly' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'aliphatic'},
+                    'gln' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'amide'},
+                    'glu' : {'polarity' : 'negative charge',
+                             'chemical' : 'carboxylic acid'},
+                    'lys' : {'polarity' : 'positive charge',
+                             'chemical' : 'amine'},
+                    'pro' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aliphatic'},
+                    'leu' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aliphatic'},
+                    'ile' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aliphatic'},
+                    'val' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aliphatic'},
+                    'thr' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'alcohol'},
+                    'ser' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'alcohol'},
+                    'tyr' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aromatic'},
+                    'phe' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aromatic'},
+                    'trp' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aromatic'},
+                    'met' : {'polarity' : 'hydrophobic',
+                             'chemical' : 'aliphatic'},
+                    'his' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'imidazole'},
+                    'pca' : {'polarity' : 'hydrophilic',
+                             'chemical' : 'aliphatic'}}
+    '''dict: Residue properties, keyed on three-letter code.
+
+    Dictionary of dictionaries of protein residue properties. Properties
+    includes:
+    * ``polarity`` : classification of each residue in terms of polarity.
+    * ``chemical`` : classification of each residue in terms of chemical
+        structure of side-chain.
+
+    '''
 
     SS_DATA = {'helix' : {}, 'sheet' : {}, 'loop' : {}}
 
@@ -273,17 +361,24 @@ class ProteinResidue(Residue):
         '''Method to convert between one and three letter protein residue
         codes.
 
-        Args:
-            s (string): The source code, either one or three letter.
+        Parameters
+        ----------
+        s : string
+            The source code, either one or three letter.
 
-        Returns:
-            code (string): The code for the identical object as the input code,
-                           only of the other kind of letter count.
+        Returns
+        -------
+        code : string
+            The code for the identical object as the input code,
+            only of the other kind of letter count.
 
-        Raises:
-            TypeError: In case code input is not a string of either one or
-                       three characters.
-            KeyError: In case a non-existant residue code is given.
+        Raises
+        ------
+        TypeError
+            In case code input is not a string of either one or 
+            three characters.
+        KeyError
+            In case a non-existant residue code is given.
 
         '''
         if len(s) == 3 and isinstance(s, str):
@@ -304,10 +399,10 @@ class ProteinResidue(Residue):
     def is_protein_residue(self):
         '''Check if residue is a protein residue.
 
-        Args: None.
-
-        Returns:
-            yes_no (bool):
+        Returns
+        -------
+        yes_no : bool
+            True for protein residues
 
         '''
         return True
@@ -315,10 +410,10 @@ class ProteinResidue(Residue):
     def get_backbone_atoms(self):
         '''Return the backbone atoms of the residue.
 
-        Args: None
-
-        Returns:
-            bb_atoms (list): List of backbone atom objects of residue.
+        Returns
+        -------
+        bb_atoms : list
+            List of backbone atom objects of residue.
 
         '''
         container = []
@@ -331,10 +426,10 @@ class ProteinResidue(Residue):
     def get_sidechain_atoms(self):
         '''Return the sidechain atoms of the residue.
 
-        Args: None
-
-        Returns:
-            sc_atoms (list): List of sidechain atom objects of residue.
+        Returns
+        -------
+        sc_atoms : list
+            List of sidechain atom objects of residue.
 
         '''
         bb_atom_labels = [x.label for x in self.get_backbone_atoms()]
@@ -346,20 +441,20 @@ class ProteinResidue(Residue):
 
         return container
 
-    def get_polarity(self, name):
-        '''Retrieve the polarity class for a given protein residue type.
+    def get_polarity(self):
+        '''Retrieve the polarity class for residue.
 
-        Args:
-            name (string): three letter code of residue type
-
-        Returns:
-            polarity (string): label for polarity class.
+        Returns
+        -------
+        polarity : string
+            Label for residue polarity class.
 
         '''
-        return self._retrieve_property(name, 'polarity')
+        return self._retrieve_property(self.residue_name_3lc, 'polarity')
 
     def _validate_ss(self, ss_string):
-        '''Bla bla
+        '''Validate that a given secondary structure string is defined as a
+        constant.
 
         '''
         if ss_string is None:
@@ -376,16 +471,23 @@ class ProteinResidue(Residue):
         '''General method to retrieve protein residue type properties from
         dictionary of class constants.
 
-        Args:
-            residue_key (string): three letter code of protein residue type.
-            property_name (string): name of property to retrieve.
+        Parameters
+        ----------
+        residue_key : string
+            Three letter code of protein residue type.
+        property_name : string
+            Name of property to retrieve.
 
-        Returns:
-            property: constant property of residue type.
+        Returns
+        -------
+        property : string, int, or float 
+            Constant property of residue type.
 
-        Raises:
-            KeyError: if either the residue or the property requested is absent
-                      from the class constants.
+        Raises
+        ------
+        KeyError
+            If either the residue or the property requested is absent from 
+            the class constants.
 
         '''
         residue_key = residue_key.lower()
@@ -400,25 +502,33 @@ class ProteinResidue(Residue):
         return ret
 
     def __init__(self, name_3lc, residue_id, residue_insert='', secondary_structure=None):
-        '''Method to initialize protein residue structure object. Normally a
-        container for atomic structure objects.
-
-        Args:
-            name_3lc (string): Three letter code for the protein residue type.
-            residue_id (string): Residue id within the chain.
-            residue_insert (string, optional): Residue insertion code.
-            secondary_structure (string, optional): Secondary structure the
-                                                    protein residue part of.
-
-        '''
         super().__init__(name_3lc, residue_id + residue_insert)
         self.residue_name_1lc = self.code_convert(name_3lc)
-        self.polarity_class = self.get_polarity(self.residue_name_3lc)
+        self.polarity_class = self.get_polarity()
         self.secondary_structure = self._validate_ss(secondary_structure)
 
 class Atom:
     '''Class for the atomic structure object. This is an atom in a physical
     sense.
+
+    Parameters
+    ----------
+    name : string
+        Unique atom name within the set of atoms in residue
+    x : float
+        x-coordinate of atom.
+    y : float
+        y-coordinate of atom.
+    z : float
+        z-coordinate of atom.
+    element : string
+        Element key, as defined in the Periodic Table.
+    occupancy : float, optional, default 1.0
+        Occupancy of atom in experimental method.
+    bfactor : float, optional
+        B-factor of atom in experimental method.
+    number : int, optional
+        Numerical index of atom in experimental data.
 
     '''
     ELEMENT_DATA = {'h' : {'mass' : 1.0},
@@ -427,21 +537,33 @@ class Atom:
                     'o' : {'mass' : 16.00},
                     's' : {'mass' : 32.07},
                     'p' : {'mass' : 30.97}}
+    '''dict: Properties of relevant elements.
 
+    The properties include:
+    * ``mass`` : atomic mass of element.
+
+    '''
     def _retrieve_property(self, element_key, property_name):
         '''General method to retrieve element properties from dictionary of 
         class constants.
 
-        Args:
-            element_key (string): element key. 
-            property_name (string): name of property to retrieve.
+        Parameters
+        ----------
+        element_key : string
+            Element key as defined in the Periodic Table. 
+        property_name : string
+            Name of property to retrieve.
 
-        Returns:
-            property: constant property of element.
+        Returns
+        -------
+        property : string, int, float
+            Constant property of element.
 
-        Raises:
-            KeyError: if either the element or the property requested is absent
-                      from the class constants.
+        Raises
+        ------
+        KeyError
+            If either the element or the property requested is absent
+            from the class constants.
 
         '''
         if element_key in self.ELEMENT_DATA:
@@ -454,20 +576,7 @@ class Atom:
 
         return ret
 
-    def __init__(self, name, x, y, z, element, occupancy=None, bfactor=None, number=None):
-        '''Initialize the atomic structure class.
-
-        Args:
-            name (string): unique atom name within the set of atoms in residue
-            x: x-coordinate of atom.
-            y: y-coordinate of atom.
-            z: z-coordinate of atom.
-            element (string): element key.
-            occupancy (optional) : occupancy of atom in experimental method.
-            bfactor (optional): B-factor of atom in experimental method.
-            number (optional): numerical index of atom in experimental data.
-
-        '''
+    def __init__(self, name, x, y, z, element, occupancy=1.0, bfactor=None, number=None):
         self.label = name
         self.coordinates = (float(x), float(y), float(z))
         self.occupancy = float(occupancy)
