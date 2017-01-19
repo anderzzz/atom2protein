@@ -5,6 +5,7 @@ import xml.etree.ElementTree as etree
 
 from informatics.rawretrievers import PDBData, PubMedData
 from informatics.datacontainers import Atom, ProteinResidue, Residue, Chain, Structure
+from informatics.datacontainers import NonNaturalResidueError
 
 class UnknownDataType(Exception):
     pass
@@ -124,11 +125,17 @@ class PDBParser:
             # If a new residue is encountered, create new residue object
             if residue_index != residue_index_prev:
                 if residue_type == 'atom':
-                    residue_new = ProteinResidue(residue_name, residue_index)
+                    # This try-except clause needed because of bug in how
+                    # external XML file handles non-natural residues. Bug
+                    # report filed to RCSB on 2017-01-19.
+                    try:
+                        residue_new = ProteinResidue(residue_name, residue_index)
+                    except NonNaturalResidueError:
+                        residue_new = Residue(residue_name, residue_index)
                 elif residue_type == 'hetatm':
-                    residue_new = Residue(residue_name, residue_index)
+                        residue_new = Residue(residue_name, residue_index)
                 else:
-                    raise KeyError('Unsupported residue type %s' %(residue_type))
+                    raise RuntimeError('Unknown atom type %s encountered' %(residue_type))
                 residue_index_prev = residue_index
 
                 # Add the old residue object to the current chain object

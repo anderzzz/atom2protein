@@ -5,6 +5,9 @@ parser applied to raw data.
 class PMIDResetError(Exception):
     pass
 
+class NonNaturalResidueError(Exception):
+    pass
+
 class StructureContainer:
     '''Class to define common methods and attributes for any structure
     container, that is anything but the atomic structure object. 
@@ -291,15 +294,24 @@ class ProteinResidue(Residue):
     secondary_structure : string, optional
         Secondary structure the protein residue part of.
 
+    Raises
+    ------
+    NonNaturalResidueError
+        In case a non-natural residue type, based on the name, is given.
+
     '''
     CODES = [('ala', 'a'), ('cys', 'c'), ('glu', 'e'), ('gln', 'q'), 
              ('gly', 'g'), ('asp', 'd'), ('asn', 'n'), ('arg', 'r'),
              ('lys', 'k'), ('pro', 'p'), ('leu', 'l'), ('ile', 'i'),
              ('val', 'v'), ('thr', 't'), ('ser', 's'), ('tyr', 'y'),
-             ('phe', 'f'), ('trp', 'w'), ('met', 'm'), ('his', 'h'),
-             ('pca', 'x')]
+             ('phe', 'f'), ('trp', 'w'), ('met', 'm'), ('his', 'h')]
     '''list: List of tuples that associate one-letter and three-letter codes
     for protein residue.
+
+    '''
+
+    NATURAL_PRES = [name_3lc for name_3lc, name_1lc in CODES]
+    '''list: List of three letter codes for natural protein residues.
 
     '''
 
@@ -342,9 +354,7 @@ class ProteinResidue(Residue):
                     'met' : {'polarity' : 'hydrophobic',
                              'chemical' : 'aliphatic'},
                     'his' : {'polarity' : 'hydrophilic',
-                             'chemical' : 'imidazole'},
-                    'pca' : {'polarity' : 'hydrophilic',
-                             'chemical' : 'aliphatic'}}
+                             'chemical' : 'imidazole'}}
     '''dict: Residue properties, keyed on three-letter code.
 
     Dictionary of dictionaries of protein residue properties. Properties
@@ -502,6 +512,10 @@ class ProteinResidue(Residue):
         return ret
 
     def __init__(self, name_3lc, residue_id, residue_insert='', secondary_structure=None):
+
+        if not name_3lc.lower() in self.NATURAL_PRES:
+            raise NonNaturalResidueError("Unsupported Non-Natural Residue provided.")
+
         super().__init__(name_3lc, residue_id + residue_insert)
         self.residue_name_1lc = self.code_convert(name_3lc)
         self.polarity_class = self.get_polarity()
@@ -536,7 +550,16 @@ class Atom:
                     'n' : {'mass' : 14.01},
                     'o' : {'mass' : 16.00},
                     's' : {'mass' : 32.07},
-                    'p' : {'mass' : 30.97}}
+                    'p' : {'mass' : 30.97},
+                    'li' : {'mass' : 6.94},
+                    'f' : {'mass' : 19.00},
+                    'na' : {'mass' : 22.99},
+                    'cl' : {'mass' : 35.45},
+                    'k' : {'mass' : 39.10},
+                    'ca' : {'mass' : 40.08},
+                    'fe' : {'mass' : 55.85},
+                    'cu' : {'mass' : 63.55},
+                    'br' : {'mass' : 79.90}}
     '''dict: Properties of relevant elements.
 
     The properties include:
