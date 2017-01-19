@@ -23,8 +23,6 @@ class PDBParser:
     '''Class for parsing PDB structure file
 
     '''
-    SUPPORTED_PDB_NS = ['{http://pdbml.pdb.org/schema/pdbx-v40.xsd}']
-
     def _get_pdb_namespace(self, xml_root):
         '''Method to retrieve the XML namespace from the root.
 
@@ -99,8 +97,6 @@ class PDBParser:
         namespace = self._get_pdb_namespace(root)
         if namespace is None:
             raise UnknownPDBType('Could not locate namespace in PDB')
-        if not namespace in self.SUPPORTED_PDB_NS:
-            raise UnknownPDBType('Unknown namespace encountered: %s' %(namespace))
 
         structure = Structure(label=pdb_code)
         atoms = root.findall('.//%satom_site' %(namespace))
