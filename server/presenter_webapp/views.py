@@ -1,8 +1,5 @@
 from server.presenter_webapp.models import PresenterDataViz
 from server.presenter_webapp.serializers import PresenterDataVizSerializer
-from server.presenter_webapp.serializers import RetrieverStructureSerializer
-from server.presenter_webapp.serializers import RetrieverStructureSerializer2
-from server.presenter_webapp.serializers import RetrieverStructureSerializer3
 from django.http import Http404
 from django.template import loader
 from django.conf import settings
@@ -14,10 +11,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 
-from .forms import RetrieverForm, RetrieverForm2, RetrieverForm3 
+from server.presenter_webapp.serializers import SearchStructureSerializer, \
+                                                SummaryPropertySerializer, \
+                                                PresentationVizSerializer
+from server.presenter_webapp.forms import SearchStructureForm, \
+                                          SummaryPropertyForm, \
+                                          PresentationVizForm
 from server.presenter_webapp.models import RetrieverStructure 
-import sys
-sys.path.append('/home/anderzzz/ideas/protein')
+
 from informatics.launchers import Launcher
 
 class PresenterDataVizList(APIView):
@@ -163,40 +164,61 @@ class SourcePosts(View):
         context = {'posts' : postables}
         return HttpResponse(template.render(context, request)) 
 
-def post_simple(request):
+def search_n_launch(request):
+    '''View to get the search and calculation launch page, as well as post the
+    command to execute by the search and presentation algorithms.
+
+    Parameters
+    ----------
+    request, object
+        The HTTP request object obtained from the URL.
+
+    '''
     if request.method == 'GET':
-        form = RetrieverForm()
-        form2 = RetrieverForm2()
-        form3 = RetrieverForm3()
+        form_search = SearchStructureForm()
+        form_summary = SummaryPropertyForm()
+        form_pres = PresentationVizForm()
+
     else:
-        form = RetrieverForm(request.POST)
-        form2 = RetrieverForm2(request.POST)
-        form3 = RetrieverForm3(request.POST)
-        if form.is_valid() and form2.is_valid() and form3.is_valid():
-            search_dict = form.cleaned_data
-            sum_dict = form2.cleaned_data
-            present_dict = form3.cleaned_data
-            total_dict = search_dict.copy()
-            total_dict.update(present_dict)
-            total_dict.update(sum_dict)
-            retriever_cmd = RetrieverStructure.objects.create(**total_dict)
+         
+        form_search = SearchStructureForm(request.POST)
+        form_summary = SummaryPropertyForm(request.POST)
+        form_pres = PresentationVizForm(request.POST)
+        posted_forms = {'search' : form_search,
+                        'summary' : form_summary,
+                        'pres' : form_pres}
+
+        valid_check = all([form.is_valid() for form in list(posted_forms.values())])
+
+        if valid_check:
+            # Retrieve posted input and format as needed to create model object
+            posted_input = dict([(key, form.cleaned_data) for key, form in
+                                                          posted_forms.items()])
+            total_input = posted_input['search'].copy()
+            for key, post_inp in posted_input.items():
+                total_input.update(post_inp)
+
+            retriever_cmd = RetrieverStructure.objects.create(**total_input)
             retriever_cmd.save()
-            serializer = RetrieverStructureSerializer(retriever_cmd)
-            serializer2 = RetrieverStructureSerializer2(retriever_cmd)
-            serializer3 = RetrieverStructureSerializer3(retriever_cmd)
-            rr = serializer.data
-            rr2 = serializer2.data
-            rr3 = serializer3.data
-            pp = {'rawdata_type' : 'protein_structure', 
-                  'search_instructions' : rr,
-                  'summary_instructions' : rr2,
-                  'presentation_instructions' : rr3}
-            json_data = JSONRenderer().render(pp).decode("utf-8")
+
+            # The launcher to the computation algorithm requires JSON input
+            serial_search = SearchStructureSerializer(retriever_cmd).data
+            serial_summary = SummaryPropertySerializer(retriever_cmd).data
+            serial_pres = PresentationVizSerializer(retriever_cmd).data
+            serial_input = {'rawdata_type' : 'protein_structure',
+                            'search_instructions' : serial_search,
+                            'summary_instructions' : serial_summary,
+                            'presentation_instructions' : serial_pres}
+            json_data = JSONRenderer().render(serial_input).decode("utf-8")
             print (json_data)
+
+            # Launch calculation
             statement_creator = Launcher(json_data)
             statement_creator.launch()
+
             return HttpResponseRedirect('/sourceposts/' + str(retriever_cmd.id))
 
-    return render(request, 'retriever/test2.html', {'form': form, 
-                                                    'form2': form2,
-                                                    'form3': form3})
+    return render(request, 'retriever/retrieve_main.html', 
+                           {'form_search': form_search, 
+                            'form_summary': form_summary,
+                            'form_pres': form_pres})

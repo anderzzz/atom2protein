@@ -22,13 +22,13 @@
     <body>
 
     <h1>Protein Structure Informatics</h1>
-    <form method="POST" action="/retriever/">{% csrf_token %}
+    <form method="POST" action="/searchlaunch/">{% csrf_token %}
         <h4>Structure Search Parameters</h4>
         <div class="form-group">
-            {{ form.as_p }}
+            {{ form_search.as_p }}
         </div>
         <h4>Structure Properties</h4>
-        {% for field in form2 %}
+        {% for field in form_summary %}
             <div class="fieldWrapper">
                 {{ field.label }}
                 <div class="material-switch pull-right">
@@ -40,7 +40,7 @@
         {% endfor %}
         <h4>Presentation Properties</h4>
         <div class="form-group">
-            {{ form3.as_p }}
+            {{ form_pres.as_p }}
         </div>
         <input type='submit' value='Submit'>
     </form>

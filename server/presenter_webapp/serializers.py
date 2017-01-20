@@ -12,7 +12,7 @@ class PresenterDataVizSerializer(serializers.ModelSerializer):
                   'id_label', 'entry_data_type', 'viz_method', 'id_text',
                   'entry_data_text', 'viz_text', 'file_path', 'file_namespace')
 
-class RetrieverStructureSerializer(serializers.ModelSerializer):
+class SearchStructureSerializer(serializers.ModelSerializer):
     '''Bla bla
 
     '''
@@ -22,7 +22,7 @@ class RetrieverStructureSerializer(serializers.ModelSerializer):
         'resolution_max', 'title', 'depositdate_min', 'depositdate_max',
         'molweight_min', 'molweight_max')
 
-class RetrieverStructureSerializer2(serializers.ModelSerializer):
+class SummaryPropertySerializer(serializers.ModelSerializer):
     '''Bla bla
 
     '''
@@ -30,7 +30,7 @@ class RetrieverStructureSerializer2(serializers.ModelSerializer):
         model = RetrieverStructure
         fields = ('nresidues', 'rresidues_polarity', 'bb_torsions')
 
-class RetrieverStructureSerializer3(serializers.ModelSerializer):
+class PresentationVizSerializer(serializers.ModelSerializer):
     '''Bla bla
 
     '''
