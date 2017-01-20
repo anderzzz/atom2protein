@@ -4,8 +4,12 @@
 from informatics.datacontainers import Structure
 from informatics.calculators import StructureCalculator
 
+import inspect
 import pandas as pd
 from collections import namedtuple
+
+class ConsistencyError(Exception):
+    pass
 
 Entry = namedtuple('Entry', 'brief, value, verbose')
 
@@ -13,53 +17,33 @@ class StructureSummarizer:
     '''Bla bla
 
     '''
-    def make_json(self):
-        '''Bla bla
+    SUMMARY_KEY = {'nresidues' : {'func' : 'cmp_nresidues', 
+        'brief' : 'number of residues',
+        'verbose' : 'Total number of residues per chain, including ' + \
+                     'residues comprised of heteroatoms, such as water.'},
 
-        '''
-        pass
+                   'bb_torsions' : {'func' : 'cmp_bb_torsions',
+        'brief' : 'backbone torsion angles',
+        'verbose' : ''},
 
-    def make_pandas(self):
-        '''Bla bla
+                   'nresidues_polarity' : {'func' : 'cmp_nresidues_polarity',
+        'brief' : 'number of residues in polarity classes',
+        'verbose' : ''},
 
-        '''
-        pass
+                   'bfactor_chain_stat' : {'func' : 'cmp_bfactor_chain_stat',
+        'brief' : 'B-factor chain statistics',
+        'verbose' : ''},
 
-    def populate_bb_torsions(self, structure):
-        '''Bla bla
+                   'rresidues_polarity' : {'func' : 'cmp_rresidues_polarity',
+        'brief' : 'percentage of residues in polarity classes',
+        'verbose' : ''}
+        }
+    '''dict: Dictionary that defines how to associate a property name with a
+    property calculator function, and property semantics, both brief and
+    verbose. This dictionary, and only this dictionary, encodes all relations
+    between a summary property and the calculator machinery.
 
-        '''
-        value = self._add_id_to(self.calculator.cmp_bb_torsions(structure))
-        self['bb_torsions'] = Entry('backbone torsion angles', value, '')
-
-    def populate_bfactor_chain_stat(self, structure):
-        '''Bla bla
-
-        '''
-        value = self._add_id_to(self.calculator.cmp_bfactor_chain_stat(structure))
-        self['bfactor_chain_stat'] = Entry('B-factor chain statistics', value, '')
-
-    def populate_nresidues(self, structure):
-        '''Bla bla
-
-        '''
-        value = self._add_id_to(self.calculator.cmp_nresidues(structure))
-        self['nresidues'] = Entry('number of residues', value, '')
-
-    def populate_nresidues_polarity(self, structure):
-        '''Bla bla
-
-        '''
-        value = self._add_id_to(self.calculator.cmp_nresidues_polarity(structure))
-        self['nresidues_polarity'] = Entry('number of polarity residues', value, '')
-
-    def populate_rresidues_polarity(self, structure):
-        '''Bla bla
-
-        '''
-        value = self._add_id_to(self.calculator.cmp_rresidues_polarity(structure))
-        self['rresidues_polarity'] = Entry('percentage of polarity residues', value, '')
-
+    '''
     def items(self):
         '''Bla bla
 
@@ -95,6 +79,16 @@ class StructureSummarizer:
             new_summary[entry_type] = new_entry
 
         return new_summary
+
+    def _make_populate_func(self, name, cmp_func, brief, verbose):
+        '''Bla bla
+
+        '''
+        def _populate_x(structure):
+            value = self._add_id_to(cmp_func(structure))
+            self[name] = Entry(brief, value, verbose)
+
+        return _populate_x
 
     def _add_id_to(self, df):
         '''Bla bla
@@ -177,14 +171,42 @@ class StructureSummarizer:
         '''Bla bla
 
         '''
+        self.label = label 
         self.calculator = StructureCalculator(**kwargs_to_calc)
 
-        self.label = label 
-        self.entry_collector = {'nresidues' : nresidues,
-                                'nresidues_polarity' : nresidues_polarity,
-                                'rresidues_polarity' : rresidues_polarity,
-                                'bfactor_chain_stat' : bfactor_chain_stat,
-                                'bb_torsions' : bb_torsions}
+        # Obtain the property input arguments and their name. They define the
+        # properties to store values for and associate calculator methods with.
+        frame = inspect.currentframe()
+        args_to_init = inspect.getargvalues(frame).args
+        vals_to_init = inspect.getargvalues(frame).locals
+        prop_args = [v for v in args_to_init if not v in ['self', 'label',
+                                                          'kwargs_to_calc']]
+
+        self.entry_collector = dict([(key, value) for key, value in
+                                                      vals_to_init.items() 
+                                                  if key in prop_args]) 
+
+        # Verify that no properties are defined without calculator method, or
+        # vice versa.
+        test_set1 = set(self.entry_collector) - set(self.SUMMARY_KEY.keys())
+        test_set2 = set(self.SUMMARY_KEY.keys()) - set(self.entry_collector)
+        if not test_set1 == set([]):
+            raise ConsistencyError('More summary properties defined than ' + \
+                                   'associated with calculator method. ' + \
+                                   'Excess properties are: ' + ','.join(test_set1))
+        if not test_set2 == set([]):
+            raise ConsistencyError('Fewer summary properties defined than ' + \
+                                   'associations with calculator methods. ' + \
+                                   'Missing properties are: ' + ','.join(test_set2))
+
+        # Dynamically create population methods for each property.
+        for prop, prop_cmp in self.SUMMARY_KEY.items():
+            brief = prop_cmp['brief']
+            verbose = prop_cmp['verbose']
+            cmp_func = getattr(self.calculator, prop_cmp['func'])
+            pop_func = self._make_populate_func(prop, cmp_func, brief, verbose)
+            setattr(self, 'populate_' + prop, pop_func)
+
 
 def create_summarizer_for(container, kwargs_to_sum={}):
     '''Bla bla

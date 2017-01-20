@@ -5,11 +5,11 @@ import numpy as np
 import pprint
 import os
 
-from proteininfo.rawretrievers import PDBData, PubMedData
-from proteininfo.parsers import Parser
-from proteininfo.summaries import StructureSummarizer
-from proteininfo.presenter import Presenter, HowToViz
-from proteininfo.database import DBHandler
+from informatics.rawretrievers import PDBData, PubMedData
+from informatics.parsers import Parser
+from informatics.summaries import StructureSummarizer
+from informatics.presenter import Presenter, HowToViz
+from informatics.database import DBHandler
 
 def search_pdb():
     pdb_root = PDBData(save_to_disk=True)
@@ -59,6 +59,9 @@ def main(args):
 
         summarizer = StructureSummarizer(structure.label)
         summarizer.populate_nresidues(structure)
+        print (summarizer.populate_nresidues)
+        print (summarizer.entry_collector['nresidues'])
+        raise AttributeError('Sean Connery')
         summarizer.populate_nresidues_polarity(structure)
         summarizer.populate_rresidues_polarity(structure)
         summarizer.populate_bfactor_chain_stat(structure)
