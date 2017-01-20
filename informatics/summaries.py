@@ -1,4 +1,9 @@
-'''Bla bla
+'''The summarizer contains the classes and methods to obtain numerical
+properties to a given data container. The set of properties to obtain is
+defined dynamically as methods of the classes are called. The summarizer is
+expected to be initialized by the user, directly in code, or indirectly through
+calling code. The actual numerical evaluations are done in other classes 
+instantiated as part of the summarizer initialization.
 
 '''
 from informatics.datacontainers import Structure
@@ -9,12 +14,78 @@ import pandas as pd
 from collections import namedtuple
 
 class ConsistencyError(Exception):
+    '''In case set of properties does not match the hard-coded associations
+    with calculator functions. Should only be raised in case implementation of
+    class is wrong, not by any user error.
+
+    '''
     pass
 
 Entry = namedtuple('Entry', 'brief, value, verbose')
+'''namedtuple: Any property value is stored in a named tuple, which in addition
+to storing the numeric data also dresses it with data semantics, both in a
+brief and verbose form.
+
+'''
 
 class StructureSummarizer:
-    '''Bla bla
+    '''Defining what properties of a structure to summarize, and their value.
+    
+    Class to define which properties of a structure to obtain and their
+    associated semantics. The class also encodes methods to perform operations
+    on groups of class instances, which enables a class instance to be
+    associated with collective properties of a set of structures. This is one
+    of the key classes that a user, or a calling program, is expected to
+    initialize.
+
+    Parameters
+    ----------
+    label, string
+        Label to associate with the summary. For a single structure, the
+        structure label is recommended.
+    nresidues, namedtuple, optional
+        Number of residues in the summarized object.
+    nresidues_polarity, namedtuple, optional
+        Number of residues of a certain polarity class in the summarized
+        object.
+    rresidues_polarity, namedtuple, optional
+        Percentage of residues of a certain polarity class in the summarized
+        object.
+    bfactor_chain_stat, namedtuple, optional
+        B-factor statistics per chain in the summarized object.
+    bb_torsions, namedtuple, optional
+        Backbone torsion angles for all chains in the summarized object.
+    kwargs_to_calc, dict, optional
+        Dictionary of named arguments to be passed to the calculator class,
+        which does all the numeric evaluations of the properties.
+
+    Raises
+    ------
+    ConsistencyError
+        In case the set of properties defined in the initialization arguments
+        are not identical to the set of properties in the association
+        dictionary between property and calculation method. This should only be
+        raised if the class has been incorrectly implemented, never due to user
+        input error.
+
+    Notes
+    -----
+    The initialization dynamically generates methods that once called with a
+    particular data container instance evaluates the property, dress it with
+    the relevant data semantics, and store it in a class attribute. The methods
+    are named based on the name of the input parameters, defined above. For
+    example, if the number of residues to a structure should be evaluated, the
+    code should include
+
+    ``summarizer.populate_nresidues(structure)``
+
+    where ``summarizer`` is an instance of the current class and ``structure``
+    is an instance of a Structure class, typically obtained as output from a
+    parser.
+
+    If this class is to be expanded, the set of input arguments must be
+    expanded, along with the ``SUMMARY_KEY`` dictionary. All other associations
+    and methods are dynamically created.
 
     '''
     SUMMARY_KEY = {'nresidues' : {'func' : 'cmp_nresidues', 
@@ -45,7 +116,13 @@ class StructureSummarizer:
 
     '''
     def items(self):
-        '''Bla bla
+        '''Iterator over live properties, their name and value.
+
+        Yields
+        ------
+        key_value, tuple
+            Tuple with two elements, the name of the property and its value,
+            where the latter is described as a named tuple.
 
         '''
         for x in self:
@@ -81,7 +158,37 @@ class StructureSummarizer:
         return new_summary
 
     def _make_populate_func(self, name, cmp_func, brief, verbose):
-        '''Bla bla
+        '''Generator function to produce the methods that calls the functions
+        to numerically evaluate the property and to subsequently dress the data
+        with data semantics. The function is called dynamically to translate
+        property definitions into methods. 
+
+        Parameters
+        ----------
+        name, string
+            Name of property to construct a populate-function for.
+        cmp_func, function
+            Function object that is used to numerically evaluate the property.
+        brief, string
+            Short string of text that describes the property. This can be used
+            in subsequent presentation to end-users.
+        verbose, string
+            Long string of text that described the property. This can be used
+            in subsequent presentation to end-users. 
+
+        Returns
+        -------
+        populate_x, function
+            Function that accepts a structure object to evaluate the specified
+            property.
+
+        Notes
+        -----
+        The function is added to better satisfy the DRY principle. The list of
+        properties are defined explicitly in the class initialization, and
+        their associations to calculator functions and data semantics in a
+        hard-coded dictionary. The population functions are derived, rather
+        than explicitly coded.
 
         '''
         def _populate_x(structure):
@@ -91,7 +198,10 @@ class StructureSummarizer:
         return _populate_x
 
     def _add_id_to(self, df):
-        '''Bla bla
+        '''Extends the Pandas Series with another column with the summary
+        label. The calculator, that produces the raw data in the Pandas Series,
+        is not concerned with the summary label, hence it is added after raw
+        data is returned.
 
         '''
         names = ['id'] + df.index.names
@@ -101,7 +211,14 @@ class StructureSummarizer:
         return df
 
     def __add__(self, other):
-        '''Bla bla
+        '''Append two summary objects.
+
+        Defines the union (addition) of two summary objects and returns a new summed
+        object, also of the summary object type. The addition matches
+        properties in the two objects, and appends the content, in case
+        identical properties exists in the two objects. In case there are
+        properties present in one, but not the other, the sum contains
+        identical data for these properties as either of the two objects.
 
         '''
         # Initialize the sum Summarizer
@@ -135,7 +252,23 @@ class StructureSummarizer:
         return new_summary
 
     def __getitem__(self, key):
-        '''Bla bla
+        '''Return the value associated with a property key.
+
+        Parameters
+        ----------
+        key, string
+            Property name
+
+        Returns
+        -------
+        entry, namedtuple
+            The named tuple with property data and associated semantics
+
+        Raises
+        ------
+        KeyError
+            If the property key is either undefined or without associated
+            value.
 
         '''
         try:
@@ -149,13 +282,37 @@ class StructureSummarizer:
         return ret
 
     def __setitem__(self, key, value):
-        '''Bla bla
+        '''Set a property attribute.
+
+        Parameters
+        ----------
+        key, string
+            Property to set
+        value, namedtuple
+            Value and data semantics to set property attribute to.
+
+        Raises
+        ------
+        TypeError
+            If the value is not of the correct type
 
         '''
+        if not isinstance(value, Entry):
+            raise TypeError('The value a summarizer is set to must be an ' + \
+                            'instance of the named tuple Entry')
+
         self.entry_collector[key] = value 
 
     def __iter__(self):
-        '''Bla bla
+        '''Iterate over all populated summarized data. 
+        
+        Any items that have been left undefined, that is their associated 
+        attribute equals ``None``, are not included.
+
+        Yields
+        ------
+        entry, namedtuple
+            Named tuple with value of property and associated data semantics.
 
         '''
         live_entries = []
@@ -168,9 +325,7 @@ class StructureSummarizer:
     def __init__(self, label, nresidues=None, nresidues_polarity=None,
                  rresidues_polarity=None, bfactor_chain_stat=None,
                  bb_torsions=None, kwargs_to_calc={}):
-        '''Bla bla
 
-        '''
         self.label = label 
         self.calculator = StructureCalculator(**kwargs_to_calc)
 
@@ -209,12 +364,31 @@ class StructureSummarizer:
 
 
 def create_summarizer_for(container, kwargs_to_sum={}):
-    '''Bla bla
+    '''Factory method to produce the appropriate summarizer class for a given
+    data container.
+
+    Parameters
+    ----------
+    container, object
+        The data container object to produce a summarizer class for. 
+    kwargs_to_sum, dict, optional
+        Dictionary of arguments to pass to the summarizer class initialization.
+
+    Returns
+    -------
+    sum_obj, object
+        Instance of class to summarize the given data container.
+
+    Raises
+    ------
+    NotImplementedError
+        If a data container is given that does not have an associated class for
+        summarization.
 
     '''
     if isinstance(container, Structure):
         ret = StructureSummarizer(container.label, **kwargs_to_sum)
     else:
-        raise NotImplementedError("Only structures so far")
+        raise NotImplementedError("Data container without summarizer class given")
 
     return ret
