@@ -603,10 +603,16 @@ class Atom:
         self.label = name
         self.coordinates = (float(x), float(y), float(z))
         self.occupancy = float(occupancy)
-        self.bfactor = float(bfactor)
-        self.element = element
-        self.atom_index = int(number)
-        self.atom_mass = self._retrieve_property(element, 'mass')
+        if bfactor is None:
+            self.bfactor = None
+        else:
+            self.bfactor = float(bfactor)
+        self.element = element.lower()
+        if number is None:
+            self.atom_index = None
+        else:
+            self.atom_index = int(number)
+        self.atom_mass = self._retrieve_property(self.element, 'mass')
 
 class PubMedContainer:
     '''Bla bla
