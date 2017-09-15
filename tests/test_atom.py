@@ -1,4 +1,6 @@
-'''Bla bla
+'''Tests around set up of atoms
+
+Run from the root directory as python3 -m tests.test_atom
 
 '''
 import unittest
