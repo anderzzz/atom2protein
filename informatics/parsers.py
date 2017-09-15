@@ -1,4 +1,10 @@
-'''Bla bla
+'''Parse standard protein data files and create the relevant data container
+objects
+
+The raw data in their standard file formats are parsed by the methods
+implemented here, and a relevant data container is populated. There is a
+factory class available that maps the type of rawdata to the correct type of
+parser.
 
 '''
 import xml.etree.ElementTree as etree
@@ -237,21 +243,39 @@ class PDBParser:
 class PubMedParser:
     '''Class to parse output from a PubMed Web API search.
 
+    Parameters
+    ----------
+    data_format_signifier : string
+        The format the data will be received in. Valid values are 'xml_string' 
+        if data is XML string, 'xml_file' if data is in XML file.
+
+    Raises
+    ------
+    UnknownFormatError 
+        If format of data is unknown.
+
     '''
     def _get_and_check(self, root, path, default=''):
         '''Check if text is found at a specified tag in the PubMed XML string.
 
-        Args:
-            root (object): The XML root object from ElementTree
-            path (string): The path to the desired tag
-            default (string, optional): The default return value in case no
-                                        text is found.
+        Parameters
+        ----------
+        root : object 
+            The XML root object from ElementTree
+        path : string 
+            The path to the desired tag
+        default : string, optional
+            The default return value in case no text is found.
 
-        Returns:
-            text (string): The text found at specified path.
+        Returns
+        -------
+        text : string
+            The text found at specified path.
 
-        Raises:
-            XMLPathError: If tag is present, but text undefined.
+        Raises
+        ------
+        XMLPathError 
+            If tag is present, but text undefined.
 
         '''
         element = root.find(path)
@@ -268,12 +292,16 @@ class PubMedParser:
         '''Populates the PubMed object based on the data retrieved from the
         PubMed XML string.
 
-        Args:
-            xml_string (string): The XML string to parse
+        Parameters
+        ----------
+        xml_string : string
+            The XML string to parse
 
-        Returns:
-            entry (object): The PubMedEntry object with attributes populated in
-                            accordance with data in XML.
+        Returns
+        -------
+        entry : object 
+            The PubMedEntry object with attributes populated in accordance 
+            with data in XML.
 
         '''
         root = etree.fromstring(xml_string)
@@ -304,35 +332,26 @@ class PubMedParser:
     def __call__(self, data):
         '''Parse PubMed data and return a PubMedEntry object.
 
-        Args:
-            data: XML string or path to XML file with the PubMed data as
-                  obtained from a web search.
+        Parameters
+        ----------
+        data : string
+            XML string or path to XML file with the PubMed data as
+            obtained from a web search.
 
-        Returns:
-            entry (object): The PubMedEntry object with attributes populated in
-                            accordance with data in XML.
+        Returns
+        -------
+        entry : object
+            The PubMedEntry object with attributes populated in accordance 
+            with data in XML.
 
         '''
         return self.populator_method(data)
 
     def __init__(self, data_format_signifier='xml_string'):
-        '''Initialize a PubMed data parser.
-
-        Args:
-            data_format_signifier (string): The format the data will be
-                                            received in. Valid values are
-                                            'xml_string' if data is XML string,
-                                            'xml_file' if data is in XML file.
-
-        Returns: PubMedParser object.
-
-        Raises:
-            UnknownFormatError: If format of data is unknown.
-
-        '''
         if data_format_signifier == 'xml_string':
             self.populator_method = self._populate_from_xml
         elif data_format_signifier == 'xml_file':
+            raise NotImplementedError('Parsing based on file handle not implemented')
             self.populator_method = self._populate_from_xml_file
         else:
             raise UnknownFormatError('Unknown data format: %s' %(data_format_signifier))
@@ -344,7 +363,7 @@ class Parser:
     Class for a general data type parser, where the specific parser is
     selected on basis of the data type. This is a factory class to
     enable general use. A class instance returns a data container when called
-    with raw data as input argument..
+    with raw data as input argument.
 
     Parameters
     ----------
