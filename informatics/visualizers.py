@@ -3,7 +3,10 @@ Bokeh library to connect Python to Javascript.
 
 '''
 from bokeh.embed import components, file_html
-from bokeh.charts import Bar, BoxPlot
+#
+# TODO Bokeh has made stuff obsolete
+#
+#from bokeh.charts import Bar, BoxPlot
 from bokeh.plotting import figure, ColumnDataSource
 from bokeh.models import Range1d, HoverTool
 from bokeh.resources import Resources
@@ -46,8 +49,10 @@ class Visualizer:
         df_columnwise[y_axis] = df_columnwise[y_axis].astype(float)
 
         # Create a stacked bar
-        p = Bar(df_columnwise, label=x_axis, stack=stack, values=y_axis,
-                title=title, legend=self.legend, **self.plot_defaults)
+        print (df_columnwise)
+        raise RuntimeError
+#        p = Bar(df_columnwise, label=x_axis, stack=stack, values=y_axis,
+#                title=title, legend=self.legend, **self.plot_defaults)
 
         self.graph_object = p
 
@@ -129,9 +134,11 @@ class Visualizer:
         df_columnwise[values] = df_columnwise[values].astype(float)
 
         # Make the box plot along with styling settings
-        p = BoxPlot(df_columnwise, values=values, label=label,
-                    title=title, outliers=outliers, legend=self.legend, 
-                    **self.plot_defaults)
+        print (df_columnwise)
+        raise RuntimeError
+#        p = BoxPlot(df_columnwise, values=values, label=label,
+#                    title=title, outliers=outliers, legend=self.legend, 
+#                    **self.plot_defaults)
 
         self.graph_object = p
 

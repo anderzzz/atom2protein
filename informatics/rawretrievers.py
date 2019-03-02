@@ -363,6 +363,7 @@ class PDBData(WebService):
 
         '''
         for item_name in self._item_ids:
+            print (item_name)
             http_string = self.url_filebase + item_name + '.xml'
             content_str = self.get(http_string)
 

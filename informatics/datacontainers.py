@@ -557,8 +557,10 @@ class Atom:
                     'cl' : {'mass' : 35.45},
                     'k' : {'mass' : 39.10},
                     'ca' : {'mass' : 40.08},
+                    'mg' : {'mass' : 24.31},
                     'fe' : {'mass' : 55.85},
                     'cu' : {'mass' : 63.55},
+                    'zn' : {'mass' : 65.38},
                     'br' : {'mass' : 79.90}}
     '''dict: Properties of relevant elements.
 
